@@ -107,8 +107,6 @@ export function ImageSlideshow({
       <div className="absolute inset-0">
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
-          const isPrev = index === (currentIndex - 1 + slides.length) % slides.length;
-          const isNext = index === (currentIndex + 1) % slides.length;
 
           return (
             <div

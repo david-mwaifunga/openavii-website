@@ -74,9 +74,14 @@ export function Header() {
     <header
       className={`
         fixed top-0 left-0 right-0 z-50
-        transition-all duration-500 ease-out
+        transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${isScrolled
-          ? 'bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/50 py-3 md:py-4'
+          ? `bg-white/70 dark:bg-slate-950/70
+             backdrop-blur-2xl backdrop-saturate-[180%]
+             border-b border-white/50 dark:border-slate-700/30
+             shadow-[0_4px_30px_rgba(0,0,0,0.05),inset_0_-1px_0_rgba(255,255,255,0.1)]
+             dark:shadow-[0_4px_30px_rgba(0,0,0,0.3),inset_0_-1px_0_rgba(255,255,255,0.05)]
+             py-3 md:py-4`
           : 'bg-transparent py-4 md:py-6'
         }
       `}
@@ -191,11 +196,19 @@ export function Header() {
         {/* Mobile Menu */}
         <div
           className={`
-            lg:hidden overflow-hidden transition-all duration-500 ease-out
+            lg:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
             ${isMobileMenuOpen ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}
           `}
         >
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+          <div className="
+            bg-white/80 dark:bg-slate-900/80
+            backdrop-blur-2xl backdrop-saturate-[180%]
+            rounded-2xl
+            border border-white/50 dark:border-slate-700/30
+            shadow-[0_8px_32px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.1)]
+            dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]
+            p-4
+          ">
             <ul className="flex flex-col gap-2">
               {navLinks.map((link) => (
                 <li key={link.href}>

@@ -11,7 +11,7 @@
 import { type ReactNode, type HTMLAttributes } from 'react';
 
 /** Available card style variants */
-type CardVariant = 'default' | 'glass' | 'gradient' | 'featured';
+type CardVariant = 'default' | 'glass' | 'gradient' | 'featured' | 'premium';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   /** The content to display inside the card */
@@ -27,9 +27,9 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Versatile card component with glassmorphism effects.
- * Features smooth hover animations and optional glow effects.
- * Adapts to both light and dark themes.
+ * Versatile card component with enhanced glassmorphism effects.
+ * Features smooth hover animations, depth shadows, and modern glass aesthetics.
+ * Adapts to both light and dark themes with premium visual polish.
  */
 export function Card({
   children,
@@ -39,43 +39,62 @@ export function Card({
   className = '',
   ...props
 }: CardProps) {
-  // Base styles for all cards
+  // Base styles for all cards with enhanced transitions
   const baseStyles = `
     relative rounded-xl md:rounded-2xl overflow-hidden
-    transition-all duration-500 ease-out
+    transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
   `;
 
-  // Variant-specific styles - theme responsive
+  // Variant-specific styles - theme responsive with enhanced glassmorphism
   const variantStyles: Record<CardVariant, string> = {
     default: `
-      bg-white dark:bg-slate-900/50
-      backdrop-blur-xl
-      border border-slate-200 dark:border-slate-800/50
-      shadow-sm dark:shadow-none
+      bg-white/80 dark:bg-slate-900/60
+      backdrop-blur-xl backdrop-saturate-[180%]
+      border border-slate-200/80 dark:border-slate-700/50
+      shadow-[0_4px_24px_-1px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.1)]
+      dark:shadow-[0_4px_24px_-1px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]
     `,
     glass: `
-      bg-white/70 dark:bg-white/5
-      backdrop-blur-2xl
-      border border-slate-200/50 dark:border-white/10
+      bg-white/60 dark:bg-white/[0.04]
+      backdrop-blur-2xl backdrop-saturate-[200%]
+      border border-white/50 dark:border-white/[0.08]
+      shadow-[0_8px_32px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.2)]
+      dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)]
     `,
     gradient: `
-      bg-gradient-to-br from-white via-slate-50 to-slate-100
-      dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-800
-      border border-slate-200 dark:border-slate-700/50
+      bg-gradient-to-br from-white/90 via-slate-50/80 to-slate-100/90
+      dark:from-slate-900/80 dark:via-slate-900/70 dark:to-slate-800/80
+      backdrop-blur-xl backdrop-saturate-[150%]
+      border border-slate-200/60 dark:border-slate-700/40
+      shadow-[0_4px_20px_rgba(0,0,0,0.05)]
+      dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]
     `,
     featured: `
-      bg-gradient-to-br from-violet-50 via-white to-indigo-50
-      dark:from-violet-950/50 dark:via-slate-900 dark:to-indigo-950/50
-      border border-violet-200 dark:border-violet-500/20
+      bg-gradient-to-br from-violet-50/90 via-white/95 to-indigo-50/90
+      dark:from-violet-950/40 dark:via-slate-900/80 dark:to-indigo-950/40
+      backdrop-blur-xl backdrop-saturate-[180%]
+      border border-violet-200/60 dark:border-violet-500/20
+      shadow-[0_8px_32px_rgba(139,92,246,0.08),inset_0_1px_0_rgba(255,255,255,0.15)]
+      dark:shadow-[0_8px_32px_rgba(139,92,246,0.15),inset_0_1px_0_rgba(255,255,255,0.05)]
+    `,
+    premium: `
+      bg-gradient-to-br from-white/95 via-white/90 to-slate-50/95
+      dark:from-slate-800/60 dark:via-slate-900/70 dark:to-slate-800/60
+      backdrop-blur-2xl backdrop-saturate-[200%]
+      border border-white/60 dark:border-slate-600/30
+      shadow-[0_8px_40px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.4)]
+      dark:shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]
     `,
   };
 
-  // Hover effect styles
+  // Enhanced hover effect styles with smooth depth
   const hoverStyles = hoverable
-    ? 'hover:-translate-y-1 md:hover:-translate-y-2 hover:shadow-xl dark:hover:shadow-2xl hover:shadow-slate-200 dark:hover:shadow-violet-500/10'
+    ? `hover:-translate-y-1 md:hover:-translate-y-1.5
+       hover:shadow-[0_16px_48px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.15)]
+       dark:hover:shadow-[0_16px_48px_rgba(139,92,246,0.12),inset_0_1px_0_rgba(255,255,255,0.1)]`
     : '';
 
-  // Glow border effect
+  // Glow border effect with gradient
   const glowStyles = glowBorder
     ? 'before:absolute before:inset-0 before:rounded-2xl before:p-[1px] before:bg-gradient-to-br before:from-violet-500/50 before:via-transparent before:to-indigo-500/50 before:-z-10'
     : '';
