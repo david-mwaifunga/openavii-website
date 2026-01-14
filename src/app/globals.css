@@ -1,9 +1,125 @@
+/**
+ * Global Styles
+ * Main stylesheet for Openavii Technologies website.
+ * Includes Tailwind CSS, custom properties, and animations.
+ * Supports both light and dark themes with mobile-first approach.
+ *
+ * @author David Mwaifunga
+ * @company Openavii Technologies
+ */
+
 @import "tailwindcss";
 
+/* ============================================
+   Tailwind CSS 4 Dark Mode Configuration
+   Use class-based dark mode (applied to html element)
+   Selector targets the .dark element itself AND all descendants
+   ============================================ */
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   Light Theme (Default)
+   ============================================ */
+
 :root {
+  /* Theme indicator */
+  --theme: light;
+
+  /* Primary brand colors - Violet/Indigo theme */
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-secondary: #4f46e5;
+
+  /* Background colors - Light theme */
   --background: #ffffff;
-  --foreground: #171717;
+  --background-secondary: #f8fafc;
+  --background-tertiary: #f1f5f9;
+
+  /* Foreground colors - Light theme */
+  --foreground: #0f172a;
+  --foreground-secondary: #334155;
+  --foreground-muted: #64748b;
+
+  /* Surface colors for cards - Light theme */
+  --surface: #ffffff;
+  --surface-secondary: #f8fafc;
+  --surface-elevated: #ffffff;
+
+  /* Border colors - Light theme */
+  --border: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --border-accent: rgba(124, 58, 237, 0.3);
+
+  /* Accent colors */
+  --accent-violet: #8b5cf6;
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+
+  /* Gradient backgrounds - Light theme */
+  --gradient-hero: linear-gradient(to bottom right, #f8fafc, #f1f5f9, #e0e7ff);
+  --gradient-section: linear-gradient(to bottom, #ffffff, #f8fafc, #ffffff);
+  --gradient-card: linear-gradient(to bottom right, #ffffff, #f8fafc);
+
+  /* Shadow colors - Light theme */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-colored: rgba(124, 58, 237, 0.15);
+
+  /* Glass effect - Light theme */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.8);
 }
+
+/* ============================================
+   Dark Theme
+   ============================================ */
+
+.dark {
+  --theme: dark;
+
+  /* Primary brand colors remain consistent */
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #a78bfa;
+  --color-secondary: #6366f1;
+
+  /* Background colors - Dark theme */
+  --background: #0a0a0f;
+  --background-secondary: #0f0f17;
+  --background-tertiary: #1a1a24;
+
+  /* Foreground colors - Dark theme */
+  --foreground: #fafafa;
+  --foreground-secondary: #e2e8f0;
+  --foreground-muted: #94a3b8;
+
+  /* Surface colors for cards - Dark theme */
+  --surface: rgba(15, 15, 23, 0.8);
+  --surface-secondary: rgba(26, 26, 36, 0.8);
+  --surface-elevated: rgba(30, 30, 42, 0.9);
+
+  /* Border colors - Dark theme */
+  --border: rgba(51, 65, 85, 0.5);
+  --border-secondary: rgba(71, 85, 105, 0.5);
+  --border-accent: rgba(139, 92, 246, 0.3);
+
+  /* Gradient backgrounds - Dark theme */
+  --gradient-hero: linear-gradient(to bottom right, #0a0a0f, #0f0f17, #1a1a24);
+  --gradient-section: linear-gradient(to bottom, #0f0f17, #0a0a0f, #0f0f17);
+  --gradient-card: linear-gradient(to bottom right, rgba(15, 15, 23, 0.9), rgba(26, 26, 36, 0.9));
+
+  /* Shadow colors - Dark theme */
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --shadow-colored: rgba(139, 92, 246, 0.2);
+
+  /* Glass effect - Dark theme */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   Tailwind Theme Extensions
+   ============================================ */
 
 @theme inline {
   --color-background: var(--background);
@@ -12,15 +128,596 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   Base Styles (Mobile-First)
+   ============================================ */
+
+* {
+  scroll-behavior: smooth;
+}
+
+html {
+  /* Prevent flash of wrong theme */
+  color-scheme: light dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar - adapts to theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--accent-violet), var(--accent-indigo));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+}
+
+/* Larger scrollbar on desktop */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: var(--foreground);
+}
+
+/* ============================================
+   Custom Animations
+   ============================================ */
+
+/* Floating animation for background orbs */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-30px) translateX(5px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(15px) translateX(-15px);
+  }
+  50% {
+    transform: translateY(-15px) translateX(10px);
+  }
+  75% {
+    transform: translateY(10px) translateX(-5px);
+  }
+}
+
+/* Subtle pulse animation */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Fade in animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scroll indicator animation */
+@keyframes scroll-down {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Gradient shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Rotate animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Theme toggle animation */
+@keyframes theme-toggle {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(0.8) rotate(180deg);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+/* Hero background zoom effect */
+@keyframes hero-zoom {
+  0% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+.animate-hero-zoom {
+  animation: hero-zoom 20s ease-out forwards;
+}
+
+/* Ken Burns effect for slideshow */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.1) translate(-1%, -1%);
+  }
+}
+
+@keyframes ken-burns-reverse {
+  0% {
+    transform: scale(1.1) translate(-1%, -1%);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+/* Slideshow slide animations */
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  0% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-scale {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   Animation Utility Classes
+   ============================================ */
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-scroll-down {
+  animation: scroll-down 1.5s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-theme-toggle {
+  animation: theme-toggle 0.5s ease-in-out;
+}
+
+/* Slideshow animations */
+.animate-slideshow-ken-burns {
+  animation: ken-burns 8s ease-out forwards;
+}
+
+.animate-slideshow-ken-burns-reverse {
+  animation: ken-burns-reverse 8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.8s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.8s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.8s ease-out forwards;
+}
+
+.animate-fade-scale {
+  animation: fade-scale 0.6s ease-out forwards;
+}
+
+/* Animation delays */
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-700 {
+  animation-delay: 700ms;
+}
+
+/* ============================================
+   Scroll-Triggered Animations
+   ============================================ */
+
+/* Reveal animations - start hidden, animate on scroll */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-down {
+  from {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-left {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-right {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes reveal-rotate {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+/* Scroll animation classes */
+.scroll-animate {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-animate.is-visible {
+  animation-fill-mode: forwards;
+}
+
+.scroll-animate.reveal-up.is-visible {
+  animation: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-animate.reveal-down.is-visible {
+  animation: reveal-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-animate.reveal-left.is-visible {
+  animation: reveal-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-animate.reveal-right.is-visible {
+  animation: reveal-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-animate.reveal-scale.is-visible {
+  animation: reveal-scale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-animate.reveal-rotate.is-visible {
+  animation: reveal-rotate 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Stagger delays for scroll animations */
+.scroll-delay-100.is-visible { animation-delay: 100ms; }
+.scroll-delay-200.is-visible { animation-delay: 200ms; }
+.scroll-delay-300.is-visible { animation-delay: 300ms; }
+.scroll-delay-400.is-visible { animation-delay: 400ms; }
+.scroll-delay-500.is-visible { animation-delay: 500ms; }
+.scroll-delay-600.is-visible { animation-delay: 600ms; }
+
+/* ============================================
+   Theme-Aware Utility Classes
+   ============================================ */
+
+/* Text gradients */
+.text-gradient-primary {
+  background: linear-gradient(to right, var(--accent-violet), var(--accent-indigo));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-secondary {
+  background: linear-gradient(to right, var(--accent-purple), var(--accent-violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass Morphism - Theme aware */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+/* Theme-aware surfaces */
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.surface-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px var(--shadow-color);
+}
+
+/* ============================================
+   Interactive States
+   ============================================ */
+
+/* Focus visible styles for accessibility */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px var(--shadow-colored);
+}
+
+/* ============================================
+   Responsive Adjustments (Mobile-First)
+   ============================================ */
+
+/* Mobile scroll padding for fixed header */
+html {
+  scroll-padding-top: 80px;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 100px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   Theme Transition
+   ============================================ */
+
+/* Smooth transition for theme changes */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease,
+              color 0.3s ease,
+              fill 0.3s ease,
+              stroke 0.3s ease,
+              box-shadow 0.3s ease !important;
 }
