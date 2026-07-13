@@ -6,12 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Created By:** David Mwaifunga
 
-This is a portfolio/showcase website for Openavii Technologies, demonstrating the quality of work and design capabilities. The site displays website development packages offered by the company.
+This is a marketing/showcase website for Openavii Technologies, presenting the company's design capabilities. The site displays website and application development packages offered by the company.
 
 **Brand Name Meaning:**
 - **Open** = Open (Transparent, accessible solutions)
 - **avi** = Light (Illuminating digital pathways)
-- **i** = International (Global reach and standards)
+- **i** = Ideas (Turning ideas into digital reality)
 
 ## Development Guidelines
 

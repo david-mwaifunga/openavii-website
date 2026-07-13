@@ -23,7 +23,7 @@ const features = [
       </svg>
     ),
     title: 'Fast Delivery',
-    description: 'We deliver quality websites within tight deadlines, ensuring your business goes live quickly.',
+    description: 'We deliver quality websites and apps within tight deadlines, ensuring your business goes live quickly.',
   },
   {
     icon: (
@@ -58,7 +58,7 @@ const features = [
 const nameMeaning = [
   { part: 'Open', meaning: 'Open', description: 'Transparent, accessible solutions' },
   { part: 'avi', meaning: 'Light', description: 'Illuminating digital pathways' },
-  { part: 'i', meaning: 'International', description: 'Global reach and standards' },
+  { part: 'i', meaning: 'Ideas', description: 'Turning ideas into digital reality' },
 ];
 
 /**
@@ -86,21 +86,21 @@ export function About() {
 
       {/* Theme-Responsive Overlays */}
       {/* Light Mode Overlay */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/92 via-slate-50/90 to-white/95 dark:from-transparent dark:via-transparent dark:to-transparent" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/92 via-surface-muted/90 to-white/95 dark:from-transparent dark:via-transparent dark:to-transparent" />
 
       {/* Dark Mode Overlay */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-transparent to-transparent dark:from-slate-900/95 dark:via-slate-950/92 dark:to-slate-900/95" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-transparent to-transparent dark:from-navy-dark/95 dark:via-navy-dark/92 dark:to-navy-dark/95" />
 
       {/* Decorative gradient accent */}
-      <div className="absolute inset-0 z-[2] bg-gradient-to-br from-violet-500/5 via-transparent to-indigo-500/5 dark:from-violet-600/10 dark:via-transparent dark:to-indigo-600/10" />
+      <div className="absolute inset-0 z-[2] bg-gradient-to-br from-accent/5 via-transparent to-cyan/5 dark:from-accent/10 dark:via-transparent dark:to-cyan/10" />
 
       {/* Section borders */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent z-[3]" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent z-[3]" />
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent z-[3]" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan/40 to-transparent z-[3]" />
 
       {/* Animated Accent Orbs */}
-      <div className="absolute top-1/4 right-0 w-48 h-48 md:w-72 md:h-72 bg-violet-500/10 dark:bg-violet-600/15 rounded-full blur-3xl animate-float z-[2]" />
-      <div className="absolute bottom-1/4 left-0 w-40 h-40 md:w-64 md:h-64 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl animate-float-delayed z-[2]" />
+      <div className="absolute top-1/4 right-0 w-48 h-48 md:w-72 md:h-72 bg-accent/10 dark:bg-accent/15 rounded-full blur-3xl animate-float z-[2]" />
+      <div className="absolute bottom-1/4 left-0 w-40 h-40 md:w-64 md:h-64 bg-cyan/10 dark:bg-cyan/15 rounded-full blur-3xl animate-float-delayed z-[2]" />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -108,18 +108,18 @@ export function About() {
           ref={headerRef}
           className={`max-w-3xl mx-auto text-center mb-12 md:mb-16 scroll-animate reveal-up ${headerVisible ? 'is-visible' : ''}`}
         >
-          <span className="text-violet-600 dark:text-violet-400 font-semibold text-sm uppercase tracking-widest mb-4 block">
+          <span className="text-accent font-semibold text-sm uppercase tracking-widest mb-4 block">
             About Us
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 md:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-heading mb-4 md:mb-6">
             Illuminating Your{' '}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            <span className="text-gradient-accent">
               Digital Journey
             </span>
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg px-4 py-3 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm border border-white/50 dark:border-slate-700/30">
-            At Openavii Technologies, we believe every business deserves a powerful online presence.
-            We combine creativity with technical excellence to build websites that truly represent your brand.
+          <p className="text-fg-muted text-base md:text-lg px-4 py-3 rounded-2xl bg-surface/60 backdrop-blur-sm border border-line">
+            At Openavii Technologies, we believe every idea deserves a powerful digital presence.
+            We combine creativity with technical excellence to build websites and applications that truly represent your brand.
           </p>
         </div>
 
@@ -128,11 +128,11 @@ export function About() {
           ref={meaningRef}
           className={`max-w-4xl mx-auto mb-12 md:mb-20 scroll-animate reveal-scale ${meaningVisible ? 'is-visible' : ''}`}
         >
-          <Card variant="gradient" className="p-6 md:p-8 lg:p-12 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-white/50 dark:border-slate-700/30">
+          <Card variant="gradient" className="p-6 md:p-8 lg:p-12 bg-surface/70 backdrop-blur-md border-line">
             <div className="text-center mb-6 md:mb-8">
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+              <h3 className="text-xl md:text-2xl font-bold text-heading mb-2">
                 The Meaning Behind{' '}
-                <span className="bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                <span className="text-gradient-accent">
                   Openavii
                 </span>
               </h3>
@@ -141,26 +141,26 @@ export function About() {
               {nameMeaning.map((item, index) => (
                 <div
                   key={index}
-                  className="text-center p-4 md:p-6 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50 hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm"
+                  className="text-center p-4 md:p-6 rounded-xl bg-surface-muted/80 border border-line hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent mb-2">
+                  <div className="text-3xl md:text-4xl font-bold text-gradient-accent mb-2">
                     {item.part}
                   </div>
-                  <div className="text-slate-900 dark:text-white font-semibold mb-1">
+                  <div className="text-heading font-semibold mb-1">
                     &ldquo;{item.meaning}&rdquo;
                   </div>
-                  <div className="text-slate-500 dark:text-slate-500 text-sm">{item.description}</div>
+                  <div className="text-fg-subtle text-sm">{item.description}</div>
                 </div>
               ))}
             </div>
             <div className="text-center mt-6 md:mt-8">
-              <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base">
+              <p className="text-fg-muted text-sm md:text-base">
                 Together:{' '}
-                <span className="text-slate-900 dark:text-white font-semibold">
+                <span className="text-heading font-semibold">
                   Openavii Technologies
                 </span>{' '}
-                — Bringing open, illuminating solutions to businesses worldwide.
+                - Bringing open, illuminating ideas to life for your business.
               </p>
             </div>
           </Card>
@@ -175,19 +175,19 @@ export function About() {
             <Card
               key={index}
               variant="glass"
-              className="group bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-white/50 dark:border-slate-700/30 h-full"
+              className="group bg-surface/70 backdrop-blur-md border-line h-full"
             >
               <CardContent className="p-4 md:p-6">
                 {/* Icon */}
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-600/20 dark:to-indigo-600/20 border border-violet-200 dark:border-violet-500/20 flex items-center justify-center text-violet-600 dark:text-violet-400 mb-3 md:mb-4 group-hover:scale-110 group-hover:border-violet-500/40 transition-all duration-300">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-navy-tint border border-line flex items-center justify-center text-accent mb-3 md:mb-4 group-hover:scale-110 group-hover:border-accent/40 transition-all duration-300">
                   {feature.icon}
                 </div>
                 {/* Title */}
-                <h3 className="text-base md:text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors duration-300">
+                <h3 className="text-base md:text-lg font-semibold text-heading mb-2 group-hover:text-accent transition-colors duration-300">
                   {feature.title}
                 </h3>
                 {/* Description */}
-                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                <p className="text-fg-muted text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </CardContent>
@@ -201,8 +201,8 @@ export function About() {
           className={`mt-12 md:mt-20 scroll-animate reveal-up ${processVisible ? 'is-visible' : ''}`}
         >
           <div className="text-center mb-8 md:mb-12">
-            <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2 md:mb-4">Our Simple Process</h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base">From concept to launch in four streamlined steps</p>
+            <h3 className="text-xl md:text-2xl font-bold text-heading mb-2 md:mb-4">Our Simple Process</h3>
+            <p className="text-fg-muted text-sm md:text-base">From concept to launch in four streamlined steps</p>
           </div>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4">
             {[
@@ -216,15 +216,15 @@ export function About() {
                   className="flex flex-col items-center text-center"
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-base md:text-lg mb-2 md:mb-3 shadow-lg shadow-violet-500/25 hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-brand-gradient flex items-center justify-center text-white font-bold text-base md:text-lg mb-2 md:mb-3 shadow-lg shadow-navy/25 hover:scale-110 transition-transform duration-300">
                     {item.step}
                   </div>
-                  <h4 className="text-slate-900 dark:text-white font-semibold mb-1 text-sm md:text-base">{item.title}</h4>
-                  <p className="text-slate-500 dark:text-slate-500 text-xs md:text-sm">{item.description}</p>
+                  <h4 className="text-heading font-semibold mb-1 text-sm md:text-base">{item.title}</h4>
+                  <p className="text-fg-subtle text-xs md:text-sm">{item.description}</p>
                 </div>
                 {/* Connector line - hidden on mobile, shown on md+ */}
                 {index < 3 && (
-                  <div className="hidden md:block w-12 lg:w-16 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 opacity-30" />
+                  <div className="hidden md:block w-12 lg:w-16 h-0.5 bg-gradient-to-r from-accent to-cyan opacity-40" />
                 )}
               </div>
             ))}

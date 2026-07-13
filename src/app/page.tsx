@@ -28,10 +28,10 @@ export default function Home() {
         {/* About Section - Company story and values */}
         <About />
 
-        {/* Showcase Section - Work samples slideshow */}
+        {/* Showcase Section - Design capability & photo integration */}
         <Showcase />
 
-        {/* Packages Section - Website development packages */}
+        {/* Packages Section - Website & application development packages */}
         <Packages />
 
         {/* Add-ons Section - Optional services */}

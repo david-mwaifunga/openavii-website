@@ -2,7 +2,9 @@
  * Scroll Animation Hook
  * A custom hook for detecting when elements enter the viewport.
  * Enables smooth scroll-triggered animations throughout the site.
- * Animations replay each time elements scroll in/out of view.
+ * Elements reveal once as they enter the viewport and stay visible
+ * (content is never hidden again once shown). Falls back to visible
+ * when IntersectionObserver is unavailable.
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
@@ -34,8 +36,8 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
 ): [RefObject<T | null>, boolean] {
   const {
     threshold = 0.1,
-    rootMargin = '0px 0px -50px 0px',
-    triggerOnce = false, // Changed to false for continuous animations
+    rootMargin = '0px 0px -40px 0px',
+    triggerOnce = true, // Reveal once, then keep the content visible
     delay = 0
   } = options;
 
@@ -46,6 +48,14 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
+
+    // Progressive-enhancement fallback: if IntersectionObserver is not
+    // supported, reveal the content immediately so it is never left hidden.
+    // Deferred via queueMicrotask to avoid a synchronous set-state in effect.
+    if (typeof IntersectionObserver === 'undefined') {
+      queueMicrotask(() => setIsVisible(true));
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {

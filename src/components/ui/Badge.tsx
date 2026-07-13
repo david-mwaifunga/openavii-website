@@ -32,36 +32,37 @@ export function Badge({
   variant = 'primary',
   className = '',
 }: BadgeProps) {
-  // Variant-specific styles with gradients and shadows - theme responsive
+  // Variant-specific styles - Openavii enterprise palette (theme responsive)
   const variantStyles: Record<BadgeVariant, string> = {
+    // Quiet navy chip
     primary: `
-      bg-gradient-to-r from-violet-100 to-indigo-100
-      dark:from-violet-600/20 dark:to-indigo-600/20
-      text-violet-700 dark:text-violet-300
-      border border-violet-300 dark:border-violet-500/30
+      bg-navy-tint
+      text-heading
+      border border-line
     `,
+    // Neutral chip
     secondary: `
-      bg-slate-100 dark:bg-slate-800/50
-      text-slate-600 dark:text-slate-300
-      border border-slate-300 dark:border-slate-700
+      bg-surface-muted
+      text-fg-muted
+      border border-line
     `,
+    // Status: success
     success: `
-      bg-gradient-to-r from-emerald-100 to-teal-100
-      dark:from-emerald-600/20 dark:to-teal-600/20
-      text-emerald-700 dark:text-emerald-300
-      border border-emerald-300 dark:border-emerald-500/30
+      bg-success/10
+      text-success
+      border border-success/30
     `,
+    // Status: warning
     warning: `
-      bg-gradient-to-r from-amber-100 to-orange-100
-      dark:from-amber-600/20 dark:to-orange-600/20
-      text-amber-700 dark:text-amber-300
-      border border-amber-300 dark:border-amber-500/30
+      bg-warning/10
+      text-warning
+      border border-warning/30
     `,
+    // Highlight - electric blue accent
     popular: `
-      bg-gradient-to-r from-rose-100 to-pink-100
-      dark:from-rose-600/20 dark:to-pink-600/20
-      text-rose-700 dark:text-rose-300
-      border border-rose-300 dark:border-rose-500/30
+      bg-accent/12
+      text-accent
+      border border-accent/35
       animate-pulse-subtle
     `,
   };

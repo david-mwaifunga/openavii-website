@@ -27,48 +27,89 @@
   /* Theme indicator */
   --theme: light;
 
-  /* Primary brand colors - Violet/Indigo theme */
-  --color-primary: #7c3aed;
-  --color-primary-hover: #6d28d9;
-  --color-secondary: #4f46e5;
+  /* ------------------------------------------------------------------
+     Openavii Technologies - Approved Brand Palette (single source of
+     truth). These raw tokens mirror the brand guidelines exactly.
+     Semantic + Tailwind tokens below are all derived from these.
+     ------------------------------------------------------------------ */
 
-  /* Background colors - Light theme */
-  --background: #ffffff;
-  --background-secondary: #f8fafc;
-  --background-tertiary: #f1f5f9;
+  /* Navy brand family (from logo #233550) */
+  --color-primary: #233550;        /* Main brand navy */
+  --color-primary-dark: #162235;   /* Deep navy - dark sections, footer */
+  --color-primary-light: #526784;  /* Muted navy - subtle accents */
+  --color-primary-tint: #e8edf3;   /* Pale navy - chips, icon containers */
 
-  /* Foreground colors - Light theme */
-  --foreground: #0f172a;
-  --foreground-secondary: #334155;
-  --foreground-muted: #64748b;
+  /* Accent - electric blue (primary CTA) */
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-secondary: #06b6d4; /* Cyan - tech accent (sparingly) */
+  --color-accent-soft: #cffafe;      /* Soft cyan wash */
 
-  /* Surface colors for cards - Light theme */
-  --surface: #ffffff;
-  --surface-secondary: #f8fafc;
-  --surface-elevated: #ffffff;
+  /* Neutrals - backgrounds & surfaces */
+  --color-background: #ffffff;
+  --color-background-secondary: #f7f9fc;
+  --color-surface: #ffffff;
 
-  /* Border colors - Light theme */
-  --border: #e2e8f0;
-  --border-secondary: #cbd5e1;
-  --border-accent: rgba(124, 58, 237, 0.3);
+  /* Neutrals - text */
+  --color-text-primary: #172033;
+  --color-text-secondary: #5f6b7a;
+  --color-text-muted: #8a95a3;
 
-  /* Accent colors */
-  --accent-violet: #8b5cf6;
-  --accent-indigo: #6366f1;
-  --accent-purple: #a855f7;
+  /* Border */
+  --color-border: #dce3ea;
 
-  /* Gradient backgrounds - Light theme */
-  --gradient-hero: linear-gradient(to bottom right, #f8fafc, #f1f5f9, #e0e7ff);
-  --gradient-section: linear-gradient(to bottom, #ffffff, #f8fafc, #ffffff);
-  --gradient-card: linear-gradient(to bottom right, #ffffff, #f8fafc);
+  /* Status */
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+  --color-info: #0284c7;
+
+  /* ------------------------------------------------------------------
+     Semantic aliases consumed by @theme + raw CSS. Kept separate from
+     the palette so dark mode can remap them without touching the
+     brand hues above.
+     ------------------------------------------------------------------ */
+  --page: var(--color-background);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-background-secondary);
+  --surface-3: var(--color-primary-tint);
+  --line: var(--color-border);
+
+  --fg: var(--color-text-primary);
+  --fg-muted: var(--color-text-secondary);
+  --fg-subtle: var(--color-text-muted);
+  --heading: var(--color-primary);
+
+  /* Accent used for text/icon/border/ring - flips lighter in dark */
+  --accent: var(--color-accent);
+  --accent-hover: var(--color-accent-hover);
+  /* Accent used for filled buttons (white text) - constant for contrast */
+  --accent-solid: #2563eb;
+  --accent-solid-hover: #1d4ed8;
+  --cyan: var(--color-accent-secondary);
+  /* Deeper cyan for text/icons on light surfaces (AA-safe); brightens in dark */
+  --cyan-strong: #0e7490;
+
+  /* Legacy aliases so existing raw-CSS consumers keep resolving */
+  --background: var(--page);
+  --background-secondary: var(--surface-2);
+  --background-tertiary: var(--surface-3);
+  --foreground: var(--fg);
+  --foreground-secondary: var(--fg-muted);
+  --foreground-muted: var(--fg-subtle);
+  --surface-elevated: var(--surface);
+  --border: var(--line);
+
+  /* Approved brand gradient (135deg deep navy → navy) */
+  --gradient-brand: linear-gradient(135deg, #162235 0%, #233550 100%);
 
   /* Shadow colors - Light theme */
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --shadow-colored: rgba(124, 58, 237, 0.15);
+  --shadow-color: rgba(22, 34, 53, 0.10);
+  --shadow-colored: rgba(37, 99, 235, 0.15);
 
   /* Glass effect - Light theme */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.85);
 }
 
 /* ============================================
@@ -78,43 +119,42 @@
 .dark {
   --theme: dark;
 
-  /* Primary brand colors remain consistent */
-  --color-primary: #8b5cf6;
-  --color-primary-hover: #a78bfa;
-  --color-secondary: #6366f1;
+  /* Dark surfaces built from the navy family (#162235 / #233550) */
+  --color-background: #0e1622;          /* Page - deep navy-black */
+  --color-background-secondary: #16233a; /* Subtle raised surface */
+  --color-surface: #172538;             /* Card surface */
+  --color-primary-tint: #223451;        /* Navy chip / icon container */
 
-  /* Background colors - Dark theme */
-  --background: #0a0a0f;
-  --background-secondary: #0f0f17;
-  --background-tertiary: #1a1a24;
+  /* Text - light neutrals with accessible contrast on navy */
+  --color-text-primary: #e8edf3;
+  --color-text-secondary: #a7b2c0;
+  --color-text-muted: #78838f;
 
-  /* Foreground colors - Dark theme */
-  --foreground: #fafafa;
-  --foreground-secondary: #e2e8f0;
-  --foreground-muted: #94a3b8;
+  /* Border - soft navy line */
+  --color-border: #2c3b54;
 
-  /* Surface colors for cards - Dark theme */
-  --surface: rgba(15, 15, 23, 0.8);
-  --surface-secondary: rgba(26, 26, 36, 0.8);
-  --surface-elevated: rgba(30, 30, 42, 0.9);
+  /* Accent brightens slightly for contrast on dark navy */
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-accent-secondary: #22d3ee;
+  --color-accent-soft: rgba(37, 99, 235, 0.16);
+  /* On dark surfaces cyan can be bright and still readable */
+  --cyan-strong: #22d3ee;
 
-  /* Border colors - Dark theme */
-  --border: rgba(51, 65, 85, 0.5);
-  --border-secondary: rgba(71, 85, 105, 0.5);
-  --border-accent: rgba(139, 92, 246, 0.3);
+  /* Headings become near-white in dark mode */
+  --heading: #f1f5fa;
 
-  /* Gradient backgrounds - Dark theme */
-  --gradient-hero: linear-gradient(to bottom right, #0a0a0f, #0f0f17, #1a1a24);
-  --gradient-section: linear-gradient(to bottom, #0f0f17, #0a0a0f, #0f0f17);
-  --gradient-card: linear-gradient(to bottom right, rgba(15, 15, 23, 0.9), rgba(26, 26, 36, 0.9));
+  /* Filled primary buttons keep a strong blue for white-text contrast */
+  --accent-solid: #2563eb;
+  --accent-solid-hover: #1d4ed8;
 
   /* Shadow colors - Dark theme */
-  --shadow-color: rgba(0, 0, 0, 0.5);
-  --shadow-colored: rgba(139, 92, 246, 0.2);
+  --shadow-color: rgba(0, 0, 0, 0.45);
+  --shadow-colored: rgba(37, 99, 235, 0.25);
 
   /* Glass effect - Dark theme */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(23, 37, 56, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================
@@ -122,8 +162,41 @@
    ============================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Core surfaces / text - theme-aware (flip automatically in dark) */
+  --color-background: var(--page);
+  --color-foreground: var(--fg);
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-2);
+  --color-surface-tint: var(--surface-3);
+  --color-line: var(--line);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-heading: var(--heading);
+
+  /* Navy brand family - constant across themes (for navy fills/borders) */
+  --color-navy: var(--color-primary);
+  --color-navy-dark: var(--color-primary-dark);
+  --color-navy-light: var(--color-primary-light);
+  --color-navy-tint: var(--surface-3);
+
+  /* Accent (electric blue) + cyan tech accent */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-solid: var(--accent-solid);
+  --color-accent-solid-hover: var(--accent-solid-hover);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-cyan: var(--cyan);
+  --color-cyan-strong: var(--cyan-strong);
+
+  /* Status */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
   /* Font variables are injected by Next.js font system at runtime */
   --font-sans: var(--font-geist-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace);
@@ -145,7 +218,10 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  /* Fallback list lives inside var() - the runtime-injected next/font
+     variable may be absent, and a bare var() would otherwise invalidate
+     the whole declaration. */
+  font-family: var(--font-geist-sans, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -162,12 +238,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--accent-violet), var(--accent-indigo));
+  background: linear-gradient(to bottom, var(--color-primary-light), var(--color-primary));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-dark));
 }
 
 /* Larger scrollbar on desktop */
@@ -179,7 +255,7 @@ body {
 
 /* Selection styling */
 ::selection {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(37, 99, 235, 0.22);
   color: var(--foreground);
 }
 
@@ -499,80 +575,51 @@ body {
    Scroll-Triggered Animations
    ============================================ */
 
-/* Reveal animations - start hidden, animate on scroll */
+/* Reveal animations - transform only. Opacity is driven separately (via the
+   .is-visible declared state) so revealed content can never be stranded
+   invisible if an animation is interrupted or never advances. */
 @keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { transform: translateY(60px); }
+  to { transform: translateY(0); }
 }
 
 @keyframes reveal-down {
-  from {
-    opacity: 0;
-    transform: translateY(-60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { transform: translateY(-60px); }
+  to { transform: translateY(0); }
 }
 
 @keyframes reveal-left {
-  from {
-    opacity: 0;
-    transform: translateX(-60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { transform: translateX(-60px); }
+  to { transform: translateX(0); }
 }
 
 @keyframes reveal-right {
-  from {
-    opacity: 0;
-    transform: translateX(60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { transform: translateX(60px); }
+  to { transform: translateX(0); }
 }
 
 @keyframes reveal-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { transform: scale(0.8); }
+  to { transform: scale(1); }
 }
 
 @keyframes reveal-rotate {
-  from {
-    opacity: 0;
-    transform: rotate(-10deg) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-  }
+  from { transform: rotate(-10deg) scale(0.9); }
+  to { transform: rotate(0) scale(1); }
 }
 
-/* Scroll animation classes */
+/* Scroll animation classes.
+   Opacity is a declared property (0 hidden -> 1 revealed) with a transition,
+   so the resting revealed state is a real opacity:1 that cannot be left
+   stranded by a frozen/interrupted keyframe animation. The keyframes only
+   handle the entrance transform (slide/scale). */
 .scroll-animate {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scroll-animate.is-visible {
+  opacity: 1;
   animation-fill-mode: forwards;
 }
 
@@ -612,19 +659,30 @@ body {
    Theme-Aware Utility Classes
    ============================================ */
 
-/* Text gradients */
+/* Text gradients - navy → electric blue (brand emphasis) */
 .text-gradient-primary {
-  background: linear-gradient(to right, var(--accent-violet), var(--accent-indigo));
+  background: linear-gradient(to right, var(--color-primary), var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-secondary {
-  background: linear-gradient(to right, var(--accent-purple), var(--accent-violet));
+  background: linear-gradient(to right, var(--accent), var(--color-accent-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Accent headline gradient - electric blue → cyan.
+   Uses --cyan-strong (deep cyan on light, bright cyan on dark) so the
+   fade stays AA-legible as clipped heading text in both themes. */
+.text-gradient-accent {
+  background: linear-gradient(to right, var(--accent), var(--cyan-strong));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 /* ============================================
@@ -702,8 +760,8 @@ body {
 }
 
 .dark .glass-subtle {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.3);
+  background: rgba(23, 37, 56, 0.6);
+  border: 1px solid rgba(82, 103, 132, 0.3);
 }
 
 /* Frosted glass with gradient border */
@@ -723,9 +781,9 @@ body {
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(139, 92, 246, 0.5),
-    rgba(99, 102, 241, 0.5),
-    rgba(139, 92, 246, 0.3)
+    rgba(37, 99, 235, 0.45),
+    rgba(6, 182, 212, 0.35),
+    rgba(37, 99, 235, 0.25)
   );
   /* Gradient border mask technique */
   -webkit-mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
@@ -757,8 +815,13 @@ body {
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* Approved brand gradient (135deg deep navy → navy) */
+.bg-brand-gradient {
+  background-image: var(--gradient-brand);
 }
 
 /* Hover lift effect */

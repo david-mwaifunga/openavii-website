@@ -45,58 +45,61 @@ export function Card({
     transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
   `;
 
-  // Variant-specific styles - theme responsive with enhanced glassmorphism
+  // Variant-specific styles - Openavii enterprise palette (theme responsive)
   const variantStyles: Record<CardVariant, string> = {
+    // Clean surface card with subtle border + soft navy shadow
     default: `
-      bg-white/80 dark:bg-slate-900/60
+      bg-surface/90 dark:bg-surface/70
       backdrop-blur-xl backdrop-saturate-[180%]
-      border border-slate-200/80 dark:border-slate-700/50
-      shadow-[0_4px_24px_-1px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.1)]
-      dark:shadow-[0_4px_24px_-1px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]
+      border border-line
+      shadow-[0_2px_16px_-4px_rgba(22,34,53,0.08)]
+      dark:shadow-[0_2px_16px_-4px_rgba(0,0,0,0.35)]
     `,
+    // Frosted glass surface
     glass: `
-      bg-white/60 dark:bg-white/[0.04]
+      bg-surface/70 dark:bg-surface/55
       backdrop-blur-2xl backdrop-saturate-[200%]
-      border border-white/50 dark:border-white/[0.08]
-      shadow-[0_8px_32px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.2)]
-      dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)]
+      border border-line
+      shadow-[0_4px_24px_-6px_rgba(22,34,53,0.10)]
+      dark:shadow-[0_4px_24px_-6px_rgba(0,0,0,0.40)]
     `,
+    // Subtle neutral gradient (white → soft grey/navy tint)
     gradient: `
-      bg-gradient-to-br from-white/90 via-slate-50/80 to-slate-100/90
-      dark:from-slate-900/80 dark:via-slate-900/70 dark:to-slate-800/80
+      bg-gradient-to-br from-surface to-surface-muted
       backdrop-blur-xl backdrop-saturate-[150%]
-      border border-slate-200/60 dark:border-slate-700/40
-      shadow-[0_4px_20px_rgba(0,0,0,0.05)]
-      dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)]
+      border border-line
+      shadow-[0_2px_16px_-4px_rgba(22,34,53,0.08)]
+      dark:shadow-[0_2px_16px_-4px_rgba(0,0,0,0.35)]
     `,
+    // Featured - white surface with an accent-tinted border (no heavy fill)
     featured: `
-      bg-gradient-to-br from-violet-50/90 via-white/95 to-indigo-50/90
-      dark:from-violet-950/40 dark:via-slate-900/80 dark:to-indigo-950/40
+      bg-surface/95 dark:bg-surface/80
       backdrop-blur-xl backdrop-saturate-[180%]
-      border border-violet-200/60 dark:border-violet-500/20
-      shadow-[0_8px_32px_rgba(139,92,246,0.08),inset_0_1px_0_rgba(255,255,255,0.15)]
-      dark:shadow-[0_8px_32px_rgba(139,92,246,0.15),inset_0_1px_0_rgba(255,255,255,0.05)]
+      border border-accent/30 dark:border-accent/25
+      shadow-[0_8px_32px_-8px_rgba(37,99,235,0.16)]
+      dark:shadow-[0_8px_32px_-8px_rgba(37,99,235,0.22)]
     `,
+    // Premium - elevated white with a soft, deeper shadow
     premium: `
-      bg-gradient-to-br from-white/95 via-white/90 to-slate-50/95
-      dark:from-slate-800/60 dark:via-slate-900/70 dark:to-slate-800/60
+      bg-surface/95 dark:bg-surface/80
       backdrop-blur-2xl backdrop-saturate-[200%]
-      border border-white/60 dark:border-slate-600/30
-      shadow-[0_8px_40px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.4)]
-      dark:shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]
+      border border-line
+      shadow-[0_10px_40px_-10px_rgba(22,34,53,0.14)]
+      dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]
     `,
   };
 
-  // Enhanced hover effect styles with smooth depth
+  // Consistent hover: small lift + slightly stronger shadow + accent border tint
   const hoverStyles = hoverable
     ? `hover:-translate-y-1 md:hover:-translate-y-1.5
-       hover:shadow-[0_16px_48px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.15)]
-       dark:hover:shadow-[0_16px_48px_rgba(139,92,246,0.12),inset_0_1px_0_rgba(255,255,255,0.1)]`
+       hover:border-accent/30
+       hover:shadow-[0_16px_44px_-12px_rgba(22,34,53,0.18)]
+       dark:hover:shadow-[0_16px_44px_-12px_rgba(37,99,235,0.20)]`
     : '';
 
-  // Glow border effect with gradient
+  // Glow border effect - navy → cyan accent
   const glowStyles = glowBorder
-    ? 'before:absolute before:inset-0 before:rounded-2xl before:p-[1px] before:bg-gradient-to-br before:from-violet-500/50 before:via-transparent before:to-indigo-500/50 before:-z-10'
+    ? 'before:absolute before:inset-0 before:rounded-2xl before:p-[1px] before:bg-gradient-to-br before:from-accent/50 before:via-transparent before:to-cyan/40 before:-z-10'
     : '';
 
   return (

@@ -1,6 +1,7 @@
 /**
  * Packages Section Component
- * Displays all website development packages in an organized grid.
+ * Displays website development packages plus core services (custom application
+ * development and consultancy) in an organized, responsive grid.
  * Features background image, scroll animations, and responsive layout.
  * Theme-responsive with mobile-first design.
  *
@@ -35,7 +36,7 @@ const packages: PackageData[] = [
       'Deployment to live hosting',
       'One (1) round of revisions',
     ],
-    deliveryTime: '5 – 7 working days',
+    deliveryTime: '5 - 7 working days',
     priceRange: {
       min: 3500,
       max: 6000,
@@ -56,7 +57,7 @@ const packages: PackageData[] = [
       'Google Analytics integration',
       'Two (2) rounds of revisions',
     ],
-    deliveryTime: '7 – 10 working days',
+    deliveryTime: '7 - 10 working days',
     priceRange: {
       min: 7000,
       max: 12000,
@@ -77,11 +78,54 @@ const packages: PackageData[] = [
       'Performance optimization',
       'Two (2) rounds of revisions',
     ],
-    deliveryTime: '10 – 14 working days',
+    deliveryTime: '10 - 14 working days',
     priceRange: {
       min: 12000,
       max: 20000,
     },
+    accentColor: 'purple',
+  },
+];
+
+/**
+ * Core services offered alongside the website packages.
+ * These are bespoke engagements priced per project rather than fixed tiers.
+ */
+const services: PackageData[] = [
+  {
+    id: 'A1',
+    name: 'Custom Application Development',
+    tagline: 'Web & Mobile Apps',
+    suitableFor: 'Businesses needing bespoke software, dashboards, or platforms',
+    features: [
+      'Tailored web & mobile applications',
+      'Custom dashboards & admin panels',
+      'API design & third-party integrations',
+      'Secure authentication & user roles',
+      'Scalable database architecture',
+      'Ongoing support & iteration',
+    ],
+    deliveryTime: 'Scoped per project',
+    priceLabel: 'Custom quote',
+    featured: true,
+    accentColor: 'indigo',
+  },
+  {
+    id: 'C1',
+    name: 'Technology Consultancy',
+    tagline: 'Strategy & Guidance',
+    suitableFor: 'Teams needing technical direction, audits, or planning',
+    features: [
+      'Product & technical strategy',
+      'Architecture & code reviews',
+      'UI/UX audits & recommendations',
+      'Technology selection & roadmaps',
+      'Performance & security assessments',
+      'Team mentoring & best practices',
+    ],
+    deliveryTime: 'Flexible engagements',
+    priceLabel: 'Custom quote',
+    featured: true,
     accentColor: 'purple',
   },
 ];
@@ -104,6 +148,7 @@ export function Packages() {
 
   const [headerRef, headerVisible] = useScrollAnimation<HTMLDivElement>();
   const [packagesRef, packagesVisible] = useScrollAnimation<HTMLDivElement>();
+  const [servicesRef, servicesVisible] = useScrollAnimation<HTMLDivElement>();
   const [trustRef, trustVisible] = useScrollAnimation<HTMLDivElement>();
 
   // Handle package quote request
@@ -133,17 +178,17 @@ export function Packages() {
 
       {/* Theme-Responsive Overlays */}
       {/* Light Mode Overlay */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-slate-50/95 via-white/92 to-slate-50/95 dark:from-transparent dark:via-transparent dark:to-transparent" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-surface-muted/95 via-white/92 to-surface-muted/95 dark:from-transparent dark:via-transparent dark:to-transparent" />
 
       {/* Dark Mode Overlay */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-transparent to-transparent dark:from-slate-900/95 dark:via-slate-950/93 dark:to-slate-900/95" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-transparent to-transparent dark:from-navy-dark/95 dark:via-navy-dark/93 dark:to-navy-dark/95" />
 
       {/* Decorative gradient orbs */}
-      <div className="absolute top-1/3 left-0 w-64 md:w-96 h-64 md:h-96 bg-violet-400/10 dark:bg-violet-600/15 rounded-full blur-3xl animate-float z-[2]" />
-      <div className="absolute bottom-1/3 right-0 w-48 md:w-80 h-48 md:h-80 bg-indigo-400/10 dark:bg-indigo-600/15 rounded-full blur-3xl animate-float-delayed z-[2]" />
+      <div className="absolute top-1/3 left-0 w-64 md:w-96 h-64 md:h-96 bg-accent/10 dark:bg-accent/15 rounded-full blur-3xl animate-float z-[2]" />
+      <div className="absolute bottom-1/3 right-0 w-48 md:w-80 h-48 md:h-80 bg-cyan/10 dark:bg-cyan/15 rounded-full blur-3xl animate-float-delayed z-[2]" />
 
       {/* Section borders */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent z-[3]" />
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent z-[3]" />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -151,18 +196,19 @@ export function Packages() {
           ref={headerRef}
           className={`max-w-3xl mx-auto text-center mb-10 md:mb-16 scroll-animate reveal-up ${headerVisible ? 'is-visible' : ''}`}
         >
-          <span className="text-violet-600 dark:text-violet-400 font-semibold text-sm uppercase tracking-widest mb-4 block">
+          <span className="text-accent font-semibold text-sm uppercase tracking-widest mb-4 block">
             Our Packages
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 md:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-heading mb-4 md:mb-6">
             Website Development{' '}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            <span className="text-gradient-accent">
               Packages
             </span>
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg px-4 py-3 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm border border-white/50 dark:border-slate-700/30">
-            Choose the perfect package for your business needs. Each package is designed
-            to deliver exceptional value and quality, tailored to different stages of growth.
+          <p className="text-fg-muted text-base md:text-lg px-4 py-3 rounded-2xl bg-surface/60 backdrop-blur-sm border border-line">
+            Choose the perfect package for your business needs, crafted to deliver
+            exceptional value across every stage of growth. Building something bigger,
+            like a custom web application or platform? We do that too.
           </p>
         </div>
 
@@ -181,28 +227,55 @@ export function Packages() {
           ))}
         </div>
 
+        {/* Core Services - Custom App Development & Consultancy */}
+        <div
+          ref={servicesRef}
+          className={`mt-14 md:mt-20 max-w-5xl mx-auto scroll-animate reveal-up ${servicesVisible ? 'is-visible' : ''}`}
+        >
+          <div className="text-center mb-8 md:mb-10">
+            <span className="text-accent font-semibold text-sm uppercase tracking-widest mb-3 block">
+              Core Services
+            </span>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-heading">
+              Beyond Websites -{' '}
+              <span className="text-gradient-accent">Built to Scale</span>
+            </h3>
+            <p className="text-fg-muted text-sm md:text-base mt-3 max-w-2xl mx-auto">
+              Bigger ideas need more than a website. We design custom applications
+              and offer the strategy to bring ambitious products to life.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {services.map((svc, index) => (
+              <div key={svc.id} style={{ animationDelay: `${index * 150}ms` }}>
+                <PackageCard package={svc} onRequestQuote={handleRequestQuote} />
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Trust indicators */}
         <div
           ref={trustRef}
           className={`mt-10 md:mt-16 text-center scroll-animate reveal-up ${trustVisible ? 'is-visible' : ''}`}
         >
-          <div className="inline-flex flex-wrap justify-center items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-600 dark:text-slate-400 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/50 dark:border-slate-700/30">
+          <div className="inline-flex flex-wrap justify-center items-center gap-4 md:gap-6 text-xs md:text-sm text-fg-muted bg-surface/60 backdrop-blur-sm px-6 py-4 rounded-2xl border border-line">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <span>Secure Payment</span>
             </div>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <span className="text-line">|</span>
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
               <span>Free Support</span>
             </div>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <span className="text-line">|</span>
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-cyan-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span>Revision Rounds</span>
@@ -217,7 +290,11 @@ export function Packages() {
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           packageName={selectedPackage.name}
-          priceRange={`${formatPrice(selectedPackage.priceRange.min)} – ${formatPrice(selectedPackage.priceRange.max)}`}
+          priceRange={
+            selectedPackage.priceRange
+              ? `${formatPrice(selectedPackage.priceRange.min)} - ${formatPrice(selectedPackage.priceRange.max)}`
+              : (selectedPackage.priceLabel ?? 'Custom quote')
+          }
         />
       )}
     </section>

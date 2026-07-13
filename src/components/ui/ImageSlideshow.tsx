@@ -137,8 +137,8 @@ export function ImageSlideshow({
 
       {/* Gradient Overlays for depth */}
       <div className="absolute inset-0 z-20 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/20 via-transparent to-slate-900/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-dark/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-dark/20 via-transparent to-navy-dark/20" />
       </div>
 
       {/* Navigation Arrows */}
@@ -207,7 +207,7 @@ export function ImageSlideshow({
       {/* Progress Bar */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-30">
         <div
-          className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-300"
+          className="h-full bg-gradient-to-r from-accent to-cyan transition-all duration-300"
           style={{
             width: `${((currentIndex + 1) / slides.length) * 100}%`,
           }}
@@ -216,7 +216,7 @@ export function ImageSlideshow({
 
       {/* Slide Counter */}
       <div className="absolute top-4 md:top-6 right-4 md:right-6 z-30">
-        <div className="px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10">
+        <div className="px-3 py-1.5 rounded-full bg-navy-dark/40 backdrop-blur-md border border-white/10">
           <span className="text-white/90 text-sm font-medium">
             {currentIndex + 1} / {slides.length}
           </span>

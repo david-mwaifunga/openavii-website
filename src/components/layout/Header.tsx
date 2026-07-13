@@ -76,11 +76,11 @@ export function Header() {
         fixed top-0 left-0 right-0 z-50
         transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${isScrolled
-          ? `bg-white/70 dark:bg-slate-950/70
+          ? `bg-surface/80
              backdrop-blur-2xl backdrop-saturate-[180%]
-             border-b border-white/50 dark:border-slate-700/30
-             shadow-[0_4px_30px_rgba(0,0,0,0.05),inset_0_-1px_0_rgba(255,255,255,0.1)]
-             dark:shadow-[0_4px_30px_rgba(0,0,0,0.3),inset_0_-1px_0_rgba(255,255,255,0.05)]
+             border-b border-line
+             shadow-[0_4px_30px_-8px_rgba(22,34,53,0.10)]
+             dark:shadow-[0_4px_30px_-8px_rgba(0,0,0,0.4)]
              py-3 md:py-4`
           : 'bg-transparent py-4 md:py-6'
         }
@@ -109,7 +109,7 @@ export function Header() {
               />
             ) : (
               /* Skeleton placeholder during SSR */
-              <div className="h-10 w-36 sm:h-12 sm:w-44 md:h-14 md:w-52 lg:h-16 lg:w-60 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+              <div className="h-10 w-36 sm:h-12 sm:w-44 md:h-14 md:w-52 lg:h-16 lg:w-60 bg-surface-tint rounded animate-pulse" />
             )}
           </a>
 
@@ -125,11 +125,11 @@ export function Header() {
                   }}
                   className="
                     relative px-4 py-2 text-sm font-medium
-                    text-slate-600 dark:text-slate-400
-                    hover:text-slate-900 dark:hover:text-white
+                    text-heading/80
+                    hover:text-accent
                     transition-colors duration-300
                     after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
-                    after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-violet-500 after:to-indigo-500
+                    after:w-0 after:h-0.5 after:bg-accent
                     after:transition-all after:duration-300 hover:after:w-full
                   "
                 >
@@ -160,8 +160,8 @@ export function Header() {
               className="
                 lg:hidden relative w-10 h-10 flex items-center justify-center
                 rounded-xl
-                bg-slate-100 dark:bg-slate-800
-                border border-slate-200 dark:border-slate-700
+                bg-surface-muted
+                border border-line
                 transition-colors duration-300
               "
               aria-label="Toggle menu"
@@ -170,21 +170,21 @@ export function Header() {
                 <span
                   className={`
                     block h-0.5 rounded-full transition-all duration-300
-                    bg-slate-700 dark:bg-white
+                    bg-heading
                     ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}
                   `}
                 />
                 <span
                   className={`
                     block h-0.5 rounded-full transition-all duration-300
-                    bg-slate-700 dark:bg-white
+                    bg-heading
                     ${isMobileMenuOpen ? 'opacity-0 scale-0' : ''}
                   `}
                 />
                 <span
                   className={`
                     block h-0.5 rounded-full transition-all duration-300
-                    bg-slate-700 dark:bg-white
+                    bg-heading
                     ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}
                   `}
                 />
@@ -201,12 +201,12 @@ export function Header() {
           `}
         >
           <div className="
-            bg-white/80 dark:bg-slate-900/80
+            bg-surface/90
             backdrop-blur-2xl backdrop-saturate-[180%]
             rounded-2xl
-            border border-white/50 dark:border-slate-700/30
-            shadow-[0_8px_32px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.1)]
-            dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]
+            border border-line
+            shadow-[0_8px_32px_-8px_rgba(22,34,53,0.12)]
+            dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.45)]
             p-4
           ">
             <ul className="flex flex-col gap-2">
@@ -220,10 +220,10 @@ export function Header() {
                     }}
                     className="
                       block px-4 py-3 rounded-xl
-                      text-slate-600 dark:text-slate-300
-                      hover:text-slate-900 dark:hover:text-white
-                      bg-slate-50 dark:bg-slate-800/50
-                      hover:bg-slate-100 dark:hover:bg-slate-800
+                      text-fg-muted
+                      hover:text-heading
+                      bg-surface-muted
+                      hover:bg-navy-tint
                       transition-all duration-300
                     "
                   >

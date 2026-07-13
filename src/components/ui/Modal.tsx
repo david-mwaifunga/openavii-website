@@ -60,7 +60,7 @@ export function Modal({ isOpen, onClose, children, title, size = 'md' }: ModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-navy-dark/60 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -69,9 +69,9 @@ export function Modal({ isOpen, onClose, children, title, size = 'md' }: ModalPr
       <div
         className={`
           relative w-full ${sizeClasses[size]}
-          bg-white dark:bg-slate-900
+          bg-surface
           rounded-2xl shadow-2xl
-          border border-slate-200 dark:border-slate-700
+          border border-line
           animate-fade-in-up
           max-h-[90vh] overflow-y-auto
         `}
@@ -81,8 +81,8 @@ export function Modal({ isOpen, onClose, children, title, size = 'md' }: ModalPr
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">
-            <h2 id="modal-title" className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+          <div className="flex items-center justify-between p-4 md:p-6 border-b border-line">
+            <h2 id="modal-title" className="text-lg md:text-xl font-bold text-heading">
               {title}
             </h2>
             <button
@@ -90,8 +90,8 @@ export function Modal({ isOpen, onClose, children, title, size = 'md' }: ModalPr
               className="
                 w-8 h-8 rounded-lg
                 flex items-center justify-center
-                text-slate-400 hover:text-slate-600 dark:hover:text-slate-300
-                hover:bg-slate-100 dark:hover:bg-slate-800
+                text-fg-subtle hover:text-fg
+                hover:bg-surface-tint
                 transition-colors duration-200
               "
               aria-label="Close modal"

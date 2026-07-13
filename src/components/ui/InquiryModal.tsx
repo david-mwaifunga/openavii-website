@@ -37,7 +37,7 @@ interface LegacyInquiryModalProps {
 }
 
 /** Contact email for inquiries */
-const CONTACT_EMAIL = 'mwaifungad@gmail.com';
+const CONTACT_EMAIL = 'bmanagerapplication@gmail.com';
 
 /**
  * Modal form for inquiries.
@@ -118,11 +118,11 @@ ${formData.name}`
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
         {/* Service/Package Info Banner */}
-        <div className="bg-gradient-to-r from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30 rounded-xl p-4 border border-violet-200 dark:border-violet-700/50">
-          <p className="text-sm text-slate-600 dark:text-slate-400">{bannerLabelMap[inquiryType || 'package']}</p>
-          <p className="text-lg font-bold text-slate-900 dark:text-white">{serviceName}</p>
+        <div className="bg-navy-tint rounded-xl p-4 border border-line">
+          <p className="text-sm text-fg-muted">{bannerLabelMap[inquiryType || 'package']}</p>
+          <p className="text-lg font-bold text-heading">{serviceName}</p>
           {priceRange && (
-            <p className="text-sm text-violet-600 dark:text-violet-400">{priceRange}</p>
+            <p className="text-sm font-semibold text-accent">{priceRange}</p>
           )}
         </div>
 
@@ -130,8 +130,8 @@ ${formData.name}`
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Full Name <span className="text-red-500">*</span>
+            <label htmlFor="name" className="block text-sm font-medium text-fg mb-1">
+              Full Name <span className="text-error">*</span>
             </label>
             <input
               type="text"
@@ -141,11 +141,11 @@ ${formData.name}`
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="
                 w-full px-4 py-2.5 rounded-lg
-                bg-slate-50 dark:bg-slate-800
-                border border-slate-200 dark:border-slate-700
-                text-slate-900 dark:text-white
-                placeholder-slate-400 dark:placeholder-slate-500
-                focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+                bg-surface-muted
+                border border-line
+                text-fg
+                placeholder-fg-subtle
+                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
                 transition-all duration-200
               "
               placeholder="John Doe"
@@ -154,8 +154,8 @@ ${formData.name}`
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Email Address <span className="text-red-500">*</span>
+            <label htmlFor="email" className="block text-sm font-medium text-fg mb-1">
+              Email Address <span className="text-error">*</span>
             </label>
             <input
               type="email"
@@ -165,11 +165,11 @@ ${formData.name}`
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="
                 w-full px-4 py-2.5 rounded-lg
-                bg-slate-50 dark:bg-slate-800
-                border border-slate-200 dark:border-slate-700
-                text-slate-900 dark:text-white
-                placeholder-slate-400 dark:placeholder-slate-500
-                focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+                bg-surface-muted
+                border border-line
+                text-fg
+                placeholder-fg-subtle
+                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
                 transition-all duration-200
               "
               placeholder="john@example.com"
@@ -178,7 +178,7 @@ ${formData.name}`
 
           {/* Phone */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="phone" className="block text-sm font-medium text-fg mb-1">
               Phone Number
             </label>
             <input
@@ -188,11 +188,11 @@ ${formData.name}`
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="
                 w-full px-4 py-2.5 rounded-lg
-                bg-slate-50 dark:bg-slate-800
-                border border-slate-200 dark:border-slate-700
-                text-slate-900 dark:text-white
-                placeholder-slate-400 dark:placeholder-slate-500
-                focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+                bg-surface-muted
+                border border-line
+                text-fg
+                placeholder-fg-subtle
+                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
                 transition-all duration-200
               "
               placeholder="+260 XXX XXX XXX"
@@ -201,7 +201,7 @@ ${formData.name}`
 
           {/* Company */}
           <div>
-            <label htmlFor="company" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="company" className="block text-sm font-medium text-fg mb-1">
               Business Name
             </label>
             <input
@@ -211,11 +211,11 @@ ${formData.name}`
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
               className="
                 w-full px-4 py-2.5 rounded-lg
-                bg-slate-50 dark:bg-slate-800
-                border border-slate-200 dark:border-slate-700
-                text-slate-900 dark:text-white
-                placeholder-slate-400 dark:placeholder-slate-500
-                focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+                bg-surface-muted
+                border border-line
+                text-fg
+                placeholder-fg-subtle
+                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
                 transition-all duration-200
               "
               placeholder="Your Company Ltd"
@@ -225,7 +225,7 @@ ${formData.name}`
 
         {/* Message */}
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <label htmlFor="message" className="block text-sm font-medium text-fg mb-1">
             Additional Details
           </label>
           <textarea
@@ -235,11 +235,11 @@ ${formData.name}`
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             className="
               w-full px-4 py-2.5 rounded-lg
-              bg-slate-50 dark:bg-slate-800
-              border border-slate-200 dark:border-slate-700
-              text-slate-900 dark:text-white
-              placeholder-slate-400 dark:placeholder-slate-500
-              focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+              bg-surface-muted
+              border border-line
+              text-fg
+              placeholder-fg-subtle
+              focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
               transition-all duration-200
               resize-none
             "
@@ -261,7 +261,7 @@ ${formData.name}`
         </div>
 
         {/* Note */}
-        <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+        <p className="text-xs text-fg-subtle text-center">
           This will open your email client with the inquiry details pre-filled.
         </p>
       </form>

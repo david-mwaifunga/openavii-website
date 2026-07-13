@@ -48,11 +48,12 @@ export function ThemeToggle() {
         relative w-10 h-10 rounded-xl
         flex items-center justify-center
         transition-all duration-300
-        focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-[var(--background)]
         hover:scale-105 active:scale-95
+        border border-line
         ${isDark
-          ? 'bg-slate-800 border border-slate-700 hover:bg-slate-700'
-          : 'bg-slate-100 border border-slate-200 hover:bg-slate-200'
+          ? 'bg-surface-tint hover:bg-navy-light/25'
+          : 'bg-surface-muted hover:bg-navy-tint'
         }
       `}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -62,8 +63,8 @@ export function ThemeToggle() {
         className={`
           absolute w-5 h-5 transition-all duration-500
           ${isDark
-            ? 'opacity-100 rotate-0 scale-100 text-amber-400'
-            : 'opacity-0 rotate-90 scale-0 text-amber-500'
+            ? 'opacity-100 rotate-0 scale-100 text-warning'
+            : 'opacity-0 rotate-90 scale-0 text-warning'
           }
         `}
         fill="none"
@@ -83,8 +84,8 @@ export function ThemeToggle() {
         className={`
           absolute w-5 h-5 transition-all duration-500
           ${isDark
-            ? 'opacity-0 -rotate-90 scale-0 text-slate-700'
-            : 'opacity-100 rotate-0 scale-100 text-slate-700'
+            ? 'opacity-0 -rotate-90 scale-0 text-fg-muted'
+            : 'opacity-100 rotate-0 scale-100 text-fg-muted'
           }
         `}
         fill="none"

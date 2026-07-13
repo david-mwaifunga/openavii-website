@@ -38,13 +38,15 @@ const geistMono = Geist_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: "Openavii Technologies | Website Development Packages",
+    default: "Openavii Technologies | Web & Application Development",
     template: "%s | Openavii Technologies",
   },
   description:
-    "Transform your vision into a stunning online presence. Openavii Technologies offers professional website development packages for startups and businesses in Zambia.",
+    "Openavii Technologies turns bright ideas into open, illuminating digital experiences - professional website and application development for startups and businesses in Zambia.",
   keywords: [
     "website development",
+    "application development",
+    "web applications",
     "web design",
     "Zambia",
     "startup website",
@@ -57,26 +59,25 @@ export const metadata: Metadata = {
   publisher: "Openavii Technologies",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.png", type: "image/png", sizes: "48x48" },
       { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "Openavii Technologies",
-    title: "Openavii Technologies | Website Development Packages",
+    title: "Openavii Technologies | Web & Application Development",
     description:
-      "Transform your vision into a stunning online presence. Professional website development packages for startups and businesses.",
+      "We turn bright ideas into open, illuminating digital experiences - professional website and application development for startups and businesses.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Openavii Technologies | Website Development Packages",
+    title: "Openavii Technologies | Web & Application Development",
     description:
-      "Transform your vision into a stunning online presence. Professional website development packages.",
+      "We turn bright ideas into open, illuminating websites and applications for startups and businesses.",
   },
   robots: {
     index: true,
@@ -101,8 +102,8 @@ export default function RootLayout({
           ${geistSans.variable}
           ${geistMono.variable}
           antialiased
-          bg-white dark:bg-slate-950
-          text-slate-900 dark:text-slate-50
+          bg-page
+          text-fg
           transition-colors duration-300
         `}
       >

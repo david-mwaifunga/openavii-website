@@ -24,13 +24,17 @@ export interface PackageData {
   features: string[];
   /** Delivery timeframe */
   deliveryTime: string;
-  /** Price range in ZMW */
-  priceRange: {
+  /** Price range in ZMW (omit for custom-quote services) */
+  priceRange?: {
     min: number;
     max: number;
   };
+  /** Price label shown when there is no numeric range (e.g. "Custom quote") */
+  priceLabel?: string;
   /** Whether this is the recommended/popular option */
   isPopular?: boolean;
+  /** Render with the elevated "featured" treatment (e.g. main services) */
+  featured?: boolean;
   /** Visual accent color theme */
   accentColor: 'violet' | 'indigo' | 'purple';
 }
@@ -55,40 +59,46 @@ function formatPrice(amount: number): string {
  * Adapts to both light and dark themes.
  */
 export function PackageCard({ package: pkg, onRequestQuote }: PackageCardProps) {
-  // Color themes for different packages - light and dark mode
+  // Per-tier accents mapped onto the approved Openavii palette.
+  // Data keys are preserved (violet/indigo/purple) but resolve to
+  // navy → electric-blue → cyan for cohesive brand tiering.
   const colorThemes = {
+    // Tier 1 - Navy (constant fills keep white content AA-legible in both themes)
     violet: {
-      gradient: 'from-violet-600 to-violet-500',
-      glow: 'shadow-violet-500/20',
-      badge: 'from-violet-100 to-violet-50 dark:from-violet-600/20 dark:to-violet-500/20 border-violet-300 dark:border-violet-500/30 text-violet-700 dark:text-violet-300',
-      icon: 'text-violet-600 dark:text-violet-400',
-      border: 'border-violet-200 dark:border-violet-500/20 hover:border-violet-400 dark:hover:border-violet-500/40',
+      gradient: 'from-navy-dark to-navy',
+      glow: 'shadow-navy/25',
+      badge: 'from-navy-tint to-navy-tint border-line text-fg-muted',
+      icon: 'text-heading',
+      border: '',
     },
+    // Tier 2 - Electric blue
     indigo: {
-      gradient: 'from-indigo-600 to-indigo-500',
-      glow: 'shadow-indigo-500/20',
-      badge: 'from-indigo-100 to-indigo-50 dark:from-indigo-600/20 dark:to-indigo-500/20 border-indigo-300 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300',
-      icon: 'text-indigo-600 dark:text-indigo-400',
-      border: 'border-indigo-200 dark:border-indigo-500/20 hover:border-indigo-400 dark:hover:border-indigo-500/40',
+      gradient: 'from-accent-solid to-accent-solid-hover',
+      glow: 'shadow-accent/25',
+      badge: 'from-navy-tint to-navy-tint border-line text-fg-muted',
+      icon: 'text-accent',
+      border: '',
     },
+    // Tier 3 - Cyan / teal (tech accent)
     purple: {
-      gradient: 'from-purple-600 to-purple-500',
-      glow: 'shadow-purple-500/20',
-      badge: 'from-purple-100 to-purple-50 dark:from-purple-600/20 dark:to-purple-500/20 border-purple-300 dark:border-purple-500/30 text-purple-700 dark:text-purple-300',
-      icon: 'text-purple-600 dark:text-purple-400',
-      border: 'border-purple-200 dark:border-purple-500/20 hover:border-purple-400 dark:hover:border-purple-500/40',
+      gradient: 'from-[#0e7490] to-[#155e75]',
+      glow: 'shadow-cyan/25',
+      badge: 'from-navy-tint to-navy-tint border-line text-fg-muted',
+      icon: 'text-cyan-strong',
+      border: '',
     },
   };
 
   const theme = colorThemes[pkg.accentColor];
+  const isElevated = pkg.isPopular || pkg.featured;
 
   return (
     <Card
-      variant={pkg.isPopular ? 'featured' : 'gradient'}
+      variant={isElevated ? 'featured' : 'gradient'}
       glowBorder={pkg.isPopular}
       className={`
         h-full flex flex-col
-        ${pkg.isPopular ? 'ring-1 ring-violet-500/30' : ''}
+        ${pkg.isPopular ? 'ring-1 ring-accent/40' : ''}
         ${theme.border}
         group
       `}
@@ -109,27 +119,36 @@ export function PackageCard({ package: pkg, onRequestQuote }: PackageCardProps) 
         {/* Package Name & Badge */}
         <div className="flex items-start justify-between mb-3 md:mb-4">
           <div>
-            <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors duration-300">
+            <h3 className="text-lg md:text-xl font-bold text-heading group-hover:text-accent transition-colors duration-300">
               {pkg.name}
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">{pkg.tagline}</p>
+            <p className="text-fg-subtle text-sm">{pkg.tagline}</p>
           </div>
           <div className={`w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br ${theme.gradient} flex items-center justify-center ${theme.glow} shadow-lg`}>
             <span className="text-white font-bold text-xs md:text-sm">{pkg.id}</span>
           </div>
         </div>
 
-        {/* Price Range */}
+        {/* Price */}
         <div className="mb-3 md:mb-4">
-          <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
-              {formatPrice(pkg.priceRange.min)}
-            </span>
-            <span className="text-slate-400 dark:text-slate-500">–</span>
-            <span className="text-lg md:text-xl font-semibold text-slate-600 dark:text-slate-300">
-              {formatPrice(pkg.priceRange.max)}
-            </span>
-          </div>
+          {pkg.priceRange ? (
+            <div className="flex items-baseline gap-1 flex-wrap">
+              <span className="text-2xl md:text-3xl font-bold text-heading">
+                {formatPrice(pkg.priceRange.min)}
+              </span>
+              <span className="text-fg-subtle">-</span>
+              <span className="text-lg md:text-xl font-semibold text-fg-muted">
+                {formatPrice(pkg.priceRange.max)}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-2xl md:text-3xl font-bold text-heading">
+                {pkg.priceLabel ?? 'Custom quote'}
+              </span>
+              <span className="text-sm text-fg-subtle">tailored to scope</span>
+            </div>
+          )}
         </div>
 
         {/* Suitable For */}
@@ -141,7 +160,7 @@ export function PackageCard({ package: pkg, onRequestQuote }: PackageCardProps) 
       <CardContent className="flex-1">
         {/* Features List */}
         <div className="mb-4 md:mb-6">
-          <h4 className="text-xs md:text-sm font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wider mb-3 md:mb-4">
+          <h4 className="text-xs md:text-sm font-semibold text-fg-muted uppercase tracking-wider mb-3 md:mb-4">
             What&apos;s Included
           </h4>
           <ul className="space-y-2 md:space-y-3">
@@ -152,29 +171,29 @@ export function PackageCard({ package: pkg, onRequestQuote }: PackageCardProps) 
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-slate-600 dark:text-slate-300 text-xs md:text-sm leading-relaxed">{feature}</span>
+                <span className="text-fg-muted text-xs md:text-sm leading-relaxed">{feature}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* Delivery Time */}
-        <div className="flex items-center gap-2 text-xs md:text-sm text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 rounded-lg px-3 md:px-4 py-2 md:py-3">
+        <div className="flex items-center gap-2 text-xs md:text-sm text-fg-muted bg-surface-tint rounded-lg px-3 md:px-4 py-2 md:py-3">
           <svg className={`w-4 h-4 md:w-5 md:h-5 ${theme.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>Delivery: <strong className="text-slate-900 dark:text-white">{pkg.deliveryTime}</strong></span>
+          <span>Delivery: <strong className="text-heading">{pkg.deliveryTime}</strong></span>
         </div>
       </CardContent>
 
       <CardFooter>
         <Button
           fullWidth
-          variant={pkg.isPopular ? 'primary' : 'outline'}
+          variant={isElevated ? 'primary' : 'outline'}
           className="group/btn"
           onClick={() => onRequestQuote(pkg)}
         >
-          Request Quote
+          {pkg.priceRange ? 'Request Quote' : "Let's Talk"}
           <svg
             className="w-4 h-4 transition-transform group-hover/btn:translate-x-1"
             fill="none"

@@ -11,7 +11,7 @@
 import { type ReactNode, type ButtonHTMLAttributes } from 'react';
 
 /** Available button style variants */
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'outline-inverse' | 'ghost';
 
 /** Available button sizes */
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -49,40 +49,49 @@ export function Button({
     font-semibold rounded-xl
     transition-all duration-300 ease-out
     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background)]
-    disabled:opacity-50 disabled:cursor-not-allowed
+    disabled:opacity-60 disabled:cursor-not-allowed
+    disabled:hover:scale-100 disabled:hover:shadow-none disabled:shadow-none
     transform hover:scale-[1.02] active:scale-[0.98]
   `;
 
-  // Variant-specific styles - theme responsive
+  // Variant-specific styles - Openavii enterprise palette (theme responsive)
   const variantStyles: Record<ButtonVariant, string> = {
+    // Primary CTA: solid electric-blue accent with white text
     primary: `
-      bg-gradient-to-r from-violet-600 to-indigo-600
-      hover:from-violet-500 hover:to-indigo-500
-      text-white shadow-lg shadow-violet-500/25
-      hover:shadow-xl hover:shadow-violet-500/30
-      focus:ring-violet-500
+      bg-accent-solid text-white
+      shadow-sm shadow-accent-solid/25
+      hover:bg-accent-solid-hover hover:shadow-md hover:shadow-accent-solid/30
+      focus:ring-accent
     `,
+    // Secondary: solid navy fill
     secondary: `
-      bg-gradient-to-r from-slate-700 to-slate-600
-      dark:from-slate-800 dark:to-slate-700
-      hover:from-slate-600 hover:to-slate-500
-      dark:hover:from-slate-700 dark:hover:to-slate-600
-      text-white shadow-lg shadow-slate-900/25
-      focus:ring-slate-500
+      bg-navy text-white
+      shadow-sm shadow-navy/25
+      hover:bg-navy-dark
+      focus:ring-accent
     `,
+    // Outline: transparent with navy border + navy/near-white text
     outline: `
-      border-2 border-violet-500/50 bg-transparent
-      text-violet-600 dark:text-violet-400
-      hover:bg-violet-500/10
-      hover:border-violet-500 dark:hover:border-violet-400
-      focus:ring-violet-500
+      bg-transparent
+      border border-navy dark:border-navy-light
+      text-heading
+      hover:bg-navy-tint
+      focus:ring-accent
     `,
+    // Outline for dark surfaces (footer, dark hero) - light border + white text
+    'outline-inverse': `
+      bg-transparent
+      border border-white/35
+      text-white
+      hover:bg-white/10 hover:border-white/60
+      focus:ring-white/70
+    `,
+    // Ghost: quiet text button
     ghost: `
       bg-transparent
-      text-slate-600 dark:text-slate-300
-      hover:bg-slate-100 dark:hover:bg-white/5
-      hover:text-slate-900 dark:hover:text-white
-      focus:ring-slate-500
+      text-fg-muted
+      hover:bg-surface-tint hover:text-fg
+      focus:ring-accent
     `,
   };
 
