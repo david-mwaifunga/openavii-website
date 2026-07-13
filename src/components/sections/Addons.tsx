@@ -21,11 +21,6 @@ interface Addon {
   name: string;
   /** Brief description */
   description: string;
-  /** Price range in ZMW */
-  priceRange: {
-    min: number;
-    max: number;
-  };
   /** Icon component */
   icon: React.ReactNode;
   /** Accent color */
@@ -39,7 +34,6 @@ const addons: Addon[] = [
   {
     name: 'Additional Page',
     description: 'Expand your website with extra pages tailored to your content needs.',
-    priceRange: { min: 800, max: 1500 },
     color: 'violet',
     icon: (
       <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +44,6 @@ const addons: Addon[] = [
   {
     name: 'Blog / CMS Setup',
     description: 'Enable content management capabilities with a custom blog or news section.',
-    priceRange: { min: 3000, max: 6000 },
     color: 'indigo',
     icon: (
       <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +54,6 @@ const addons: Addon[] = [
   {
     name: 'Content Writing',
     description: 'Professional copywriting services to craft compelling content for your website.',
-    priceRange: { min: 2000, max: 6000 },
     color: 'purple',
     icon: (
       <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +64,6 @@ const addons: Addon[] = [
   {
     name: 'Logo & Branding',
     description: 'Logo refresh or basic branding package to elevate your visual identity.',
-    priceRange: { min: 2000, max: 5000 },
     color: 'emerald',
     icon: (
       <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,15 +77,7 @@ const addons: Addon[] = [
 const maintenanceService = {
   name: 'Monthly Maintenance & Support',
   description: 'Ongoing website and application maintenance, security updates, content changes, and priority support to keep your product running smoothly.',
-  priceRange: { min: 500, max: 1500 },
 };
-
-/**
- * Formats a number as ZMW currency
- */
-function formatPrice(amount: number): string {
-  return `ZMW ${amount.toLocaleString()}`;
-}
 
 /**
  * Color theme configurations for add-on cards - light and dark mode
@@ -187,7 +170,8 @@ export function Addons() {
           </h2>
           <p className="text-fg-muted text-base md:text-lg px-4 py-3 rounded-2xl bg-surface/60 backdrop-blur-sm border border-line">
             Customize your package with additional services to maximize your online impact.
-            Each add-on is designed to complement and enhance your website.
+            Each add-on is designed to complement and enhance your website - pricing is
+            tailored to your needs, so get in touch for a quote.
           </p>
         </div>
 
@@ -225,17 +209,9 @@ export function Addons() {
                       <h3 className="text-base md:text-lg font-semibold text-heading mb-1 group-hover:text-accent transition-colors duration-300">
                         {addon.name}
                       </h3>
-                      <p className="text-fg-muted text-xs md:text-sm mb-2 md:mb-3 leading-relaxed">
+                      <p className="text-fg-muted text-xs md:text-sm leading-relaxed">
                         {addon.description}
                       </p>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
-                          From
-                        </span>
-                        <span className="text-base md:text-lg font-bold text-heading">
-                          {formatPrice(addon.priceRange.min)}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -275,17 +251,8 @@ export function Addons() {
                   </p>
                 </div>
 
-                {/* Price and CTA */}
-                <div className="flex flex-col items-center md:items-end gap-3 md:gap-4 md:pl-6 lg:pl-8 md:border-l md:border-line">
-                  <div className="text-center md:text-right">
-                    <div className="text-xs md:text-sm text-fg-subtle mb-1">Starting at</div>
-                    <div className="text-2xl md:text-3xl font-bold text-heading">
-                      {formatPrice(maintenanceService.priceRange.min)}
-                    </div>
-                    <div className="text-fg-muted text-sm">
-                      to {formatPrice(maintenanceService.priceRange.max)}/month
-                    </div>
-                  </div>
+                {/* CTA */}
+                <div className="flex flex-col items-center md:items-end justify-center md:pl-6 lg:pl-8 md:border-l md:border-line">
                   <Button className="w-full sm:w-auto" onClick={() => setMaintenanceModalOpen(true)}>
                     Learn More
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,7 +288,6 @@ export function Addons() {
         onClose={() => setMaintenanceModalOpen(false)}
         inquiryType="service"
         serviceName={maintenanceService.name}
-        priceRange={`${formatPrice(maintenanceService.priceRange.min)} - ${formatPrice(maintenanceService.priceRange.max)}/month`}
       />
 
       {/* Custom Project Modal */}
