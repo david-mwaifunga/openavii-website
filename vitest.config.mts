@@ -22,5 +22,8 @@ export default defineConfig({
     // Global CSS is parsed as plain text by tokens.test.ts; no CSS pipeline needed.
     css: false,
     restoreMocks: true,
+    // The page-wide axe tests take 2-5 s; on a busy machine or a OneDrive folder one ran 5.3 s and
+    // timed out against the 5 s default. This is a time allowance, not a looser assertion.
+    testTimeout: 20_000,
   },
 });

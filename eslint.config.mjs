@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Claude Code keeps git worktrees inside the project (.claude/worktrees/*): each is another
+    // full copy of the site, with its own build output, and must never be linted from here.
+    ".claude/**",
   ]),
 ]);
 

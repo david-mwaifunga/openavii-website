@@ -78,6 +78,26 @@ describe('tokens only', () => {
   });
 });
 
+describe('tooling stays inside the project', () => {
+  // Claude Code keeps its git worktrees INSIDE the project folder (.claude/worktrees/*), each with its own
+  // node_modules and .next. Without these exclusions `npm run lint` in the main folder reported 8,995
+  // problems from another copy of the site, and tsc walked into it as well.
+  it('lints nothing inside .claude: a worktree there is another copy of the site', () => {
+    expect(read(path.join(ROOT, 'eslint.config.mjs'))).toMatch(/["']\.claude\/\*\*["']/);
+  });
+
+  it('type-checks nothing inside .claude', () => {
+    const tsconfig = JSON.parse(read(path.join(ROOT, 'tsconfig.json'))) as { exclude?: string[] };
+    expect(tsconfig.exclude).toContain('.claude');
+  });
+
+  it('gives the page-wide axe tests time on a slow machine: they took 5.3 s against the 5 s default in a OneDrive folder', () => {
+    const configured = read(path.join(ROOT, 'vitest.config.mts')).match(/testTimeout:\s*([\d_]+)/);
+    expect(configured, 'vitest.config.mts must set testTimeout').not.toBeNull();
+    expect(Number((configured as RegExpMatchArray)[1].replaceAll('_', ''))).toBeGreaterThanOrEqual(15000);
+  });
+});
+
 describe('repo conventions', () => {
   it('documents every component, hook, context, lib and content module with @author and @company', () => {
     const documented = source.filter((f) =>
