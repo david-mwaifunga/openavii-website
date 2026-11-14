@@ -70,6 +70,14 @@ describe('ContactCta', () => {
     expect(grid.innerHTML).not.toMatch(/gmail/i);
   });
 
+  it('keeps every contact link a 44 px touch target (a 22 px phone number is easy to miss)', () => {
+    renderWithProviders(<ContactCta />);
+    const grid = screen.getByRole('list', { name: 'Contact details' });
+    const links = within(grid).getAllByRole('link');
+    expect(links.length).toBeGreaterThanOrEqual(5);
+    for (const link of links) expect(link.className, link.textContent ?? '').toContain('min-h-11');
+  });
+
   it('shows the closing photograph', () => {
     renderWithProviders(<ContactCta />);
     expect(screen.getByRole('img', { name: photos['cafe-sunlight'].alt })).toBeInTheDocument();

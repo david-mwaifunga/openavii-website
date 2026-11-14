@@ -328,6 +328,21 @@ describe('section behaviours that live in CSS', () => {
     expect(target.outline).toMatch(/2px solid/);
   });
 
+  it("aims an in-page link at a revealed element's final place, not its hidden start (a link must not land 28 px short, under the fixed header)", () => {
+    // A hidden reveal sits 28 px low and its transition starts from there, so the browser would
+    // measure the element at that spot and stop short once it lifts into place. The reveal wrapper
+    // (.scroll-animate) is not the link target - the tile inside it is - so the rule must match the
+    // wrapper that CONTAINS the target as well as the target itself.
+    const block = blocks.find((b) =>
+      b.selectors.some((s) => /^\.js \.scroll-animate:is\(/.test(s) && s.includes(':target') && s.includes(':has(:target)')),
+    );
+    expect(block, 'missing ".js .scroll-animate:is(:target, :has(:target))"').toBeDefined();
+    const declarations = parseDeclarations(block?.body ?? '');
+    expect(declarations.opacity).toBe('1');
+    expect(declarations.transform).toBe('none');
+    expect(declarations.transition).toBe('none');
+  });
+
   it('shows the process timeline fully lit without JavaScript (dim states exist only under .js)', () => {
     const dim = blocks.filter((b) => /timeline-node/.test(b.selectors.join(',')) && /:not\(\.is-visible\)/.test(b.selectors.join(',')));
     expect(dim.length).toBeGreaterThan(0);

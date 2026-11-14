@@ -19,6 +19,7 @@ import { renderToString } from 'react-dom/server';
 import { InquiryProvider, ThemeProvider } from '@/context';
 import { sectionIds, site } from '@/content/site';
 import { services } from '@/content/services';
+import { AMERICAN_SPELLING, BANNED_FILLER, INVENTED_CLAIMS, UNAPPROVED_REGISTRATIONS } from '@/test/copyRules';
 import Home from './page';
 
 const html = renderToString(
@@ -55,6 +56,39 @@ describe('home page, server-rendered', () => {
     const hints = [...html.matchAll(/<link[^>]*rel="preload"[^>]*as="image"[^>]*>/g)].map((m) => m[0]);
     expect(hints, hints.join('\n')).toHaveLength(1);
     expect(hints[0]).toContain('commuter-laptop');
+  });
+
+  describe('every word the visitor can read (components and content together)', () => {
+    // Visible text only: no scripts, styles or markup, and decoded entities.
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/g, ' ')
+      .replace(/<style[\s\S]*?<\/style>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&#x27;|&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/\s+/g, ' ');
+
+    it('is a substantial body of copy (guard against a vacuous scan)', () => {
+      expect(text.length).toBeGreaterThan(15000);
+    });
+
+    it.each(BANNED_FILLER.map(([label, pattern]) => [label, pattern] as const))('contains no banned filler: %s', (_label, pattern) => {
+      expect(text.match(pattern)?.[0]).toBeUndefined();
+    });
+
+    it('is written in British English', () => {
+      expect(text.match(AMERICAN_SPELLING)?.[0]).toBeUndefined();
+    });
+
+    it('makes no invented claim and shows no unapproved registration', () => {
+      for (const claim of INVENTED_CLAIMS) expect(text.match(claim)?.[0], String(claim)).toBeUndefined();
+      expect(text.match(UNAPPROVED_REGISTRATIONS)?.[0]).toBeUndefined();
+    });
+
+    it('has no template residue or placeholders', () => {
+      expect(text).not.toMatch(/lorem|ipsum|available for new projects|coming soon|\bTODO\b|XXX/i);
+    });
   });
 
   it('keeps the page free of tracking code, third-party scripts and cookie handling', () => {

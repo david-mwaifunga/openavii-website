@@ -513,6 +513,17 @@
   transform: none;
 }
 
+/* An in-page link must aim at where an element will END UP. A hidden reveal sits 28 px low and
+   its transition starts from there, so the browser would measure it at that spot and the page
+   would stop 28 px short, tucking a service tile's top edge under the fixed header. The target,
+   or the reveal wrapper that contains it, therefore skips the offset and the transition: it is
+   simply lit on arrival (the tile's own outline marks it). */
+.js .scroll-animate:is(:target, :has(:target)) {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 @keyframes rise-in {
   from {
     transform: translateY(108%);

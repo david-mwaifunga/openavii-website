@@ -49,6 +49,17 @@ describe('Packages', () => {
     expect(screen.queryByText(/most popular|best value|recommended/i)).toBeNull();
   });
 
+  it('keeps every line of a package head at full strength (faded white on the teal head measures 4.2:1, below AA for 12 px text)', () => {
+    const { container } = renderWithProviders(<Packages />);
+    const heads = container.querySelectorAll('[data-package] > div:first-child');
+    expect(heads).toHaveLength(3);
+    for (const head of heads) {
+      for (const el of head.querySelectorAll('*')) {
+        expect(el.className, `"${el.textContent}" must not be faded with an opacity utility`).not.toMatch(/\bopacity-/);
+      }
+    }
+  });
+
   it('opens the enquiry dialog for a package with its price range', async () => {
     renderWithProviders(<Packages />);
     const card = screen.getByRole('article', { name: packages[1].name });

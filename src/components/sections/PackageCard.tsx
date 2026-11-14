@@ -39,7 +39,8 @@ export function PackageCard({ pkg }: { pkg: WebsitePackage }) {
       className="flex h-full flex-col overflow-hidden rounded-tile border border-line bg-surface"
     >
       <div className={cn('px-7 py-6', HEAD[pkg.tone])}>
-        <p aria-hidden="true" className="text-overline uppercase opacity-80">
+        {/* Full strength, never faded: white at 80 % on the teal head is 4.2:1, below AA for text this small. */}
+        <p aria-hidden="true" className="text-overline uppercase">
           {pkg.id}
         </p>
         <h3 id={titleId} className="mt-2 text-balance text-h3 text-inherit">

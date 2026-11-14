@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { AMERICAN_SPELLING, BANNED_FILLER, INVENTED_CLAIMS, UNAPPROVED_REGISTRATIONS } from '@/test/copyRules';
 import * as content from './index';
 
 interface Entry {
@@ -88,32 +89,14 @@ describe('the copy inventory', () => {
 });
 
 describe('banned filler (Digest §3)', () => {
-  it.each([
-    ['cutting-edge', /cutting[- ]edge/i],
-    ['world-class', /world[- ]class/i],
-    ['best-in-class', /best[- ]in[- ]class/i],
-    ['revolutionary', /revolutionary/i],
-    ['game-changing', /game[- ]chang(ing|er)/i],
-    ['next-gen', /next[- ]gen(eration)?/i],
-    ['synergy', /synerg/i],
-    ['captivate', /captivat/i],
-    ['"drive real results"', /drive real results/i],
-    ['stunning', /stunning/i],
-    ['pixel-perfect', /pixel[- ]perfect/i],
-    ['lightning fast', /lightning[- ]fast/i],
-    ['leading provider', /leading provider/i],
-    ['"#1"', /#1\b/],
-    ['trusted by thousands', /trusted by thousands/i],
-  ])('contains no "%s"', (_label, pattern) => {
+  it.each(BANNED_FILLER.map(([label, pattern]) => [label, pattern] as const))('contains no %s', (_label, pattern) => {
     expect(offenders(pattern)).toEqual([]);
   });
 });
 
 describe('British English', () => {
   it('has no American spellings', () => {
-    const american =
-      /organiz|optimiz|customiz|digitiz|modernize|personaliz|prioritiz|standardiz|utiliz|analyz|minimiz|maximiz|visualiz|synchroniz|centraliz|finaliz|realiz|recogniz|summariz|specializ|\bcolor|\bcenter|behavior|\bfavor|neighbor|\bcatalog\b|defense/i;
-    expect(offenders(american)).toEqual([]);
+    expect(offenders(AMERICAN_SPELLING)).toEqual([]);
   });
 
   it('writes "enquiry" for the form, not the American "inquiry"', () => {
@@ -123,14 +106,11 @@ describe('British English', () => {
 
 describe('never invented, never unapproved', () => {
   it('claims no statistics, years in business, counts, awards, certifications or testimonials', () => {
-    expect(offenders(/\bsince\s+(19|20)\d{2}\b/i)).toEqual([]);
-    expect(offenders(/\b\d+\+?\s+(years?|projects?|clients?|customers?|countries|users)\b/i)).toEqual([]);
-    expect(offenders(/\b(award[- ]winning|awarded|certified|accredited|iso\s?\d{4,5}|testimonial)\b/i)).toEqual([]);
-    expect(offenders(/\btrusted by\b/i)).toEqual([]);
+    for (const claim of INVENTED_CLAIMS) expect(offenders(claim), String(claim)).toEqual([]);
   });
 
   it('never shows pending registrations or the tax identifier', () => {
-    expect(offenders(/awaiting approval|\bTPIN\b|\bZRA\b|ICTAZ|ZPPA|NAPSA|ZICTA/i)).toEqual([]);
+    expect(offenders(UNAPPROVED_REGISTRATIONS)).toEqual([]);
   });
 
   it('keeps the vision an aspiration: "most trusted" appears only in the vision statement', () => {

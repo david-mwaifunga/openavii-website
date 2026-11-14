@@ -20,7 +20,8 @@ import { closingCta, contactLabels } from '@/content/contact';
 import { site } from '@/content/site';
 import { useInquiry } from '@/context/InquiryContext';
 
-const LINK = 'font-bold text-heading underline-offset-4 hover:text-accent-text hover:underline';
+const LINK =
+  'inline-flex min-h-11 items-center font-bold text-heading underline-offset-4 hover:text-accent-text hover:underline';
 
 export function ContactCta() {
   const { openInquiry } = useInquiry();
