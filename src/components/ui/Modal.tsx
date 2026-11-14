@@ -24,25 +24,41 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg';
+  /** Accessible name of the close button (content layer text, e.g. `inquiryCopy.close`). */
+  closeLabel?: string;
 }
 
 const SIZES = { sm: 'sm:max-w-sm', md: 'sm:max-w-md', lg: 'sm:max-w-xl' } as const;
 
-export function Modal({ isOpen, onClose, title, children, size = 'lg' }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, size = 'lg', closeLabel = 'Close' }: ModalProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
+  // Whether the current press began outside the dialog (see dismissal below).
+  const pressStartedOutside = useRef(false);
   useDialogBehaviour({ isOpen, onClose, containerRef: dialogRef });
 
   if (!isOpen) return null;
 
+  const isOutsideDialog = (target: EventTarget) => !dialogRef.current?.contains(target as Node);
+
+  // Dismissal lives on the layer that holds the dialog, not on the backdrop. The page-wide
+  // `inert` pass in useDialogBehaviour also silences the backdrop (it is the dialog's sibling),
+  // so a real browser never delivers a click to it: the click reaches this layer instead. A press
+  // that starts inside the dialog and is released outside (selecting text in a field) must not
+  // dismiss it, hence the press is remembered.
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
-      <div
-        data-testid="modal-backdrop"
-        aria-hidden="true"
-        onClick={onClose}
-        className="absolute inset-0 bg-depth/75"
-      />
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6"
+      onPointerDown={(event) => {
+        pressStartedOutside.current = isOutsideDialog(event.target);
+      }}
+      onClick={(event) => {
+        const dismiss = pressStartedOutside.current && isOutsideDialog(event.target);
+        pressStartedOutside.current = false;
+        if (dismiss) onClose();
+      }}
+    >
+      <div data-testid="modal-backdrop" aria-hidden="true" className="absolute inset-0 bg-depth/75" />
       <div
         ref={dialogRef}
         role="dialog"
@@ -61,7 +77,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'lg' }: ModalPr
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={closeLabel}
             className="grid size-11 shrink-0 place-items-center rounded-pill text-fg transition-colors hover:bg-alt"
           >
             <Icon name="X" />

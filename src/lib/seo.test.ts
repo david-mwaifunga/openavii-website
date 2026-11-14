@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseCssBlocks, parseDeclarations, resolveColor, toHex } from './contrast';
 import { BRAND_COLOURS, organizationJsonLd, siteMetadata, siteViewport } from './seo';
+import { copyNew } from '@/content/copy';
 import { site } from '@/content/site';
 
 const title = siteMetadata.title as { default: string; template: string };
@@ -23,6 +24,12 @@ describe('siteMetadata', () => {
     expect(title.default).toBe('Openavii Technologies | Illuminating Your Digital Journey');
     expect(title.template).toBe('%s | Openavii Technologies');
     expect(title.default.length).toBeLessThanOrEqual(65);
+  });
+
+  it('takes its description from the content layer, where every sentence the brand documents lack is registered for the owner to approve', () => {
+    // It is the most visible text in search results, so it must not slip past approval as a string hidden in a lib file.
+    expect(siteMetadata.description).toBe(site.description);
+    expect(copyNew.some((entry) => entry.text === site.description)).toBe(true);
   });
 
   it('has a description that fits a search result and says what the company does', () => {

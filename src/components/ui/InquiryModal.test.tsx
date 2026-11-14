@@ -11,6 +11,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { INQUIRY_LIMITS } from '@/lib/mailto';
 import { InquiryModal } from './InquiryModal';
 
 const setup = (props: Partial<React.ComponentProps<typeof InquiryModal>> = {}) => {
@@ -94,7 +95,7 @@ describe('InquiryModal', () => {
   });
 
   it('opens the mail app addressed to info@openavii.com with the package in subject and body', async () => {
-    const { navigate, onClose, user } = setup();
+    const { navigate, user } = setup();
     await user.type(screen.getByLabelText(/Full name/), 'Mulenga Banda');
     await user.type(screen.getByLabelText(/Email address/), 'mulenga@example.com');
     await user.type(screen.getByLabelText(/Additional details/), 'Launch in March');
@@ -107,7 +108,72 @@ describe('InquiryModal', () => {
     expect(body).toContain('Standard Business Website package (ZMW 7,000 – 12,000)');
     expect(body).toContain('Mulenga Banda');
     expect(body).toContain('Launch in March');
-    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('limits every field to what fits in the mail link', () => {
+    setup();
+    expect(screen.getByLabelText(/Full name/)).toHaveAttribute('maxlength', String(INQUIRY_LIMITS.name));
+    expect(screen.getByLabelText(/Email address/)).toHaveAttribute('maxlength', String(INQUIRY_LIMITS.email));
+    expect(screen.getByLabelText(/Phone number/)).toHaveAttribute('maxlength', String(INQUIRY_LIMITS.phone));
+    expect(screen.getByLabelText(/Business name/)).toHaveAttribute('maxlength', String(INQUIRY_LIMITS.company));
+    expect(screen.getByLabelText(/Additional details/)).toHaveAttribute('maxlength', String(INQUIRY_LIMITS.message));
+  });
+
+  it('explains the asterisk, so a sighted visitor knows what it marks', () => {
+    setup();
+    expect(screen.getByText(/Required fields are marked/)).toBeInTheDocument();
+  });
+
+  describe('after sending', () => {
+    // The enquiry travels in a mailto: link. A visitor with no mail app set up sees nothing happen, so the
+    // dialog must not close behind them and lose what they typed: it stays, says what happened and how else to reach us.
+    const send = async () => {
+      const result = setup();
+      await result.user.type(screen.getByLabelText(/Full name/), 'Mulenga Banda');
+      await result.user.type(screen.getByLabelText(/Email address/), 'mulenga@example.com');
+      await result.user.type(screen.getByLabelText(/Additional details/), 'Launch in March');
+      await result.user.click(screen.getByRole('button', { name: 'Send Enquiry' }));
+      return result;
+    };
+
+    it('says nothing until something has been sent', () => {
+      setup();
+      expect(screen.getByRole('status')).toBeEmptyDOMElement();
+    });
+
+    it('stays open and says what happened', async () => {
+      const { onClose } = await send();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByRole('dialog', { name: 'Request a Quote' })).toBeInTheDocument();
+      expect(screen.getByRole('status')).toHaveTextContent('Your email app should now be open with your enquiry ready to send.');
+    });
+
+    it('offers the e-mail address and WhatsApp for the visitor whose mail app did not open', async () => {
+      await send();
+      const status = screen.getByRole('status');
+      expect(status).toHaveTextContent('Nothing opened? Email info@openavii.com or message us on WhatsApp.');
+      expect(within(status).getByRole('link', { name: 'info@openavii.com' })).toHaveAttribute('href', 'mailto:info@openavii.com');
+      const whatsapp = within(status).getByRole('link', { name: 'WhatsApp' });
+      expect(whatsapp.getAttribute('href')).toMatch(/^https:\/\/wa\.me\/260967223048\?text=Hello/);
+      expect(whatsapp).toHaveAttribute('target', '_blank');
+      expect(whatsapp).toHaveAttribute('rel', expect.stringContaining('noopener'));
+    });
+
+    it('keeps what was typed, so the visitor can send it again', async () => {
+      const { navigate, user } = await send();
+      expect(screen.getByLabelText(/Additional details/)).toHaveValue('Launch in March');
+      await user.click(screen.getByRole('button', { name: 'Send Enquiry' }));
+      expect(navigate).toHaveBeenCalledTimes(2);
+    });
+
+    it('turns Cancel into Close', async () => {
+      const { onClose, user } = await send();
+      expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull();
+      const closers = screen.getAllByRole('button', { name: 'Close' }); // the header X and the footer button
+      expect(closers).toHaveLength(2);
+      await user.click(closers[1]);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('tells people exactly what sending does with their details', () => {

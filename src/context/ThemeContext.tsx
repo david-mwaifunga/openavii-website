@@ -125,6 +125,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const resolvedTheme: ResolvedTheme =
     theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
 
+  // Announce that the app is alive: the inline script drops its `js` gate after a grace
+  // period unless it sees this mark (so a bundle that fails to load cannot leave content hidden).
+  useEffect(() => {
+    document.documentElement.setAttribute('data-hydrated', '');
+  }, []);
+
   // Keep <html> in step with the resolved theme (a no-op after the inline script).
   useEffect(() => {
     if (!hydrated) return;

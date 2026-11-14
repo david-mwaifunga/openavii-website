@@ -15,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: site.name,
     short_name: site.shortName,
-    description: `${site.tagline}. Lusaka-based technology partner.`,
+    description: site.description,
     start_url: '/',
     display: 'standalone',
     lang: site.locale,

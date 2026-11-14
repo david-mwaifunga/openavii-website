@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Modal } from './Modal';
 
@@ -108,6 +108,30 @@ describe('Modal', () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
+  it('closes when the press lands on the dialog layer itself: a real browser cannot deliver clicks to the (inert) backdrop, so it sends them here', async () => {
+    // jsdom has no hit-testing and ignores `inert`, which is why the backdrop test above passes while the
+    // real thing failed: the page-wide inert pass also silences the backdrop, and a click on the dim area
+    // then reaches its parent. Press the parent to model what Chrome, Safari and Firefox actually do.
+    const onClose = vi.fn();
+    render(<Harness onClose={onClose} />);
+    const user = await open();
+    const layer = screen.getByTestId('modal-backdrop').parentElement as HTMLElement;
+    await user.click(layer);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('does not close when a press starts inside the dialog and is released outside it (selecting text in a field)', async () => {
+    const onClose = vi.fn();
+    render(<Harness onClose={onClose} />);
+    await open();
+    const layer = screen.getByTestId('modal-backdrop').parentElement as HTMLElement;
+    fireEvent.pointerDown(screen.getByLabelText('First field'));
+    fireEvent.click(layer); // the browser fires the click on the common ancestor of the press and the release
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
   it('makes the rest of the page inert while open, and restores it after', async () => {
     render(<Harness />);
     const user = await open();
@@ -124,6 +148,21 @@ describe('Modal', () => {
     expect(document.body.style.overflow).toBe('hidden');
     await user.keyboard('{Escape}');
     expect(document.body.style.overflow).toBe('');
+  });
+
+  it('names its close button from the text it is given (content layer), "Close" by default', () => {
+    const { rerender } = render(
+      <Modal isOpen onClose={() => {}} title="One">
+        x
+      </Modal>,
+    );
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    rerender(
+      <Modal isOpen onClose={() => {}} title="One" closeLabel="Shut this window">
+        x
+      </Modal>,
+    );
+    expect(screen.getByRole('button', { name: 'Shut this window' })).toBeInTheDocument();
   });
 
   it('gives every dialog its own title id, so several can exist without clashes', () => {

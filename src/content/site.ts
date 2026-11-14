@@ -2,13 +2,16 @@
  * Company facts
  * The ONLY place for the company name, legal name, contact details, address,
  * registration, URLs and social links. Everything below is from the Company
- * Profile (Digest §1). Deliberately absent: the ZRA TPIN, and the ICTAZ, ZPPA,
+ * Profile (Digest §1), except `description`, which is new copy registered for
+ * the owner's approval. Deliberately absent: the ZRA TPIN, and the ICTAZ, ZPPA,
  * NAPSA and ZICTA registrations, which are still awaiting approval and must
  * never be presented as achieved.
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
  */
+
+import { newCopy } from './copy';
 
 /** A real social profile. Add one only when the owner supplies its URL. */
 export interface SocialLink {
@@ -22,6 +25,11 @@ export const site = {
   shortName: 'Openavii',
   legalName: 'Openavii Technologies Limited',
   tagline: 'Illuminating Your Digital Journey',
+  /** One-sentence description for search results, link previews and the web manifest (110-160 characters). */
+  description: newCopy(
+    'site.description',
+    'Lusaka-based technology partner. Websites, custom software, automation and consultancy that turn complex business challenges into practical, scalable solutions.',
+  ), // COPY-NEW
   url: 'https://www.openavii.com',
   domain: 'www.openavii.com',
   locale: 'en-ZM',

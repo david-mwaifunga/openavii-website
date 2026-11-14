@@ -15,28 +15,48 @@ export interface MatchMediaOptions {
   dark?: boolean;
   /** Report `(prefers-reduced-motion: reduce)` as matching. */
   reducedMotion?: boolean;
+  /** Report `(min-width: 80rem)` (the xl breakpoint) as matching. */
+  wide?: boolean;
 }
 
 /** Handle returned by {@link installMatchMedia} for flipping state mid-test. */
 export interface MatchMediaController {
-  /** Change the colour scheme and notify `change` listeners. */
+  /** Change the colour scheme and notify the colour-scheme listeners. */
   setDark(dark: boolean): void;
+  /** Cross the xl breakpoint and notify the width listeners. */
+  setWide(wide: boolean): void;
 }
 
+type MediaListener = (event: { matches: boolean; media: string }) => void;
+
 /**
- * Install a `window.matchMedia` stub that understands the two media features
- * the site queries (colour scheme and reduced motion) and supports `change`
- * listeners, so theme tests can simulate the OS switching schemes.
+ * Install a `window.matchMedia` stub that understands the media features the
+ * site queries (colour scheme, reduced motion and the xl width) and supports
+ * `change` listeners per query, so tests can simulate the OS switching schemes
+ * or a window being resized across a breakpoint.
  */
 export function installMatchMedia(options: MatchMediaOptions = {}): MatchMediaController {
   let dark = options.dark ?? false;
+  let wide = options.wide ?? false;
   const reducedMotion = options.reducedMotion ?? false;
-  const listeners = new Set<() => void>();
+  const listeners = new Map<string, Set<MediaListener>>();
 
   const matches = (query: string): boolean => {
     if (query.includes('prefers-color-scheme: dark')) return dark;
     if (query.includes('prefers-reduced-motion: reduce')) return reducedMotion;
+    if (query.includes('min-width: 80rem')) return wide;
     return false;
+  };
+  const listenersFor = (query: string) => {
+    let set = listeners.get(query);
+    if (!set) listeners.set(query, (set = new Set()));
+    return set;
+  };
+  /** Tell the listeners of every query that mentions `feature`, as a browser would. */
+  const notify = (feature: string) => {
+    for (const [query, set] of listeners) {
+      if (query.includes(feature)) set.forEach((cb) => cb({ matches: matches(query), media: query }));
+    }
   };
 
   Object.defineProperty(window, 'matchMedia', {
@@ -48,10 +68,10 @@ export function installMatchMedia(options: MatchMediaOptions = {}): MatchMediaCo
       },
       media: query,
       onchange: null,
-      addEventListener: (_type: string, cb: () => void) => listeners.add(cb),
-      removeEventListener: (_type: string, cb: () => void) => listeners.delete(cb),
-      addListener: (cb: () => void) => listeners.add(cb),
-      removeListener: (cb: () => void) => listeners.delete(cb),
+      addEventListener: (_type: string, cb: MediaListener) => listenersFor(query).add(cb),
+      removeEventListener: (_type: string, cb: MediaListener) => listenersFor(query).delete(cb),
+      addListener: (cb: MediaListener) => listenersFor(query).add(cb),
+      removeListener: (cb: MediaListener) => listenersFor(query).delete(cb),
       dispatchEvent: () => false,
     })),
   });
@@ -59,7 +79,11 @@ export function installMatchMedia(options: MatchMediaOptions = {}): MatchMediaCo
   return {
     setDark(next: boolean) {
       dark = next;
-      listeners.forEach((cb) => cb());
+      notify('prefers-color-scheme: dark');
+    },
+    setWide(next: boolean) {
+      wide = next;
+      notify('min-width: 80rem');
     },
   };
 }
@@ -67,6 +91,7 @@ export function installMatchMedia(options: MatchMediaOptions = {}): MatchMediaCo
 /** A single observed element and its callback, as captured by the stub. */
 interface ObserverRecord {
   callback: IntersectionObserverCallback;
+  options: IntersectionObserverInit | undefined;
   elements: Set<Element>;
 }
 
@@ -76,6 +101,8 @@ export interface IntersectionController {
   trigger(element: Element, isIntersecting?: boolean): void;
   /** Number of observers currently watching at least one element. */
   activeCount(): number;
+  /** The options the observer watching `element` was created with (when it fires), or undefined. */
+  optionsFor(element: Element): IntersectionObserverInit | undefined;
 }
 
 /**
@@ -88,8 +115,8 @@ export function installIntersectionObserver(): IntersectionController {
 
   class StubObserver {
     private record: ObserverRecord;
-    constructor(callback: IntersectionObserverCallback) {
-      this.record = { callback, elements: new Set() };
+    constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+      this.record = { callback, options, elements: new Set() };
       records.push(this.record);
     }
     observe(element: Element) {
@@ -119,5 +146,6 @@ export function installIntersectionObserver(): IntersectionController {
       }
     },
     activeCount: () => records.filter((r) => r.elements.size > 0).length,
+    optionsFor: (element) => records.find((r) => r.elements.has(element))?.options,
   };
 }

@@ -50,12 +50,14 @@ function ServiceTile({ service, index, spanLast = false }: { service: Service; i
           {service.title}
         </h4>
         <p className="tile-muted mt-3 text-small">{service.summary}</p>
+        {/* Fifteen buttons share one label, so each is described by its own tile heading (WCAG 2.4.6). */}
         <button
           type="button"
+          aria-describedby={titleId}
           onClick={() => openInquiry({ type: 'service', name: service.title })}
           className="mt-auto inline-flex min-h-11 items-center gap-2 pt-6 font-bold underline-offset-4 hover:underline"
         >
-          Get a Quote
+          {servicesSection.quoteLabel}
           <Icon name="ArrowRight" size={18} />
         </button>
       </Tile>

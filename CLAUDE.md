@@ -48,7 +48,9 @@ npm run assets      # regenerate public/brand/** from the brand masters (see "Br
 - **Geist** (variable, via `next/font/google`) is the only typeface. Geist Mono is not part of the brand and is not loaded.
 - **lucide-react** is the single icon set (stroke 1.5, round caps). It is the only runtime dependency beyond Next and React.
 - **Vitest 4** + Testing Library + `vitest-axe` (jsdom). `sharp` is a dev dependency for the asset pipeline.
-- No backend, no analytics, no trackers, no cookies. The enquiry form opens the visitor's own mail app (`mailto:`).
+- No backend, no analytics, no trackers, no cookies. The enquiry form opens the visitor's own mail app (`mailto:`) and then
+  stays open with the company's e-mail address and WhatsApp as a fallback, so nothing typed is lost if no mail app opens.
+  Every field has a length limit (`INQUIRY_LIMITS` in `lib/mailto`) that keeps the link under the ~2,000 characters some mail apps accept.
 
 ## Project Architecture
 
@@ -57,7 +59,8 @@ src/
 ├── app/                    layout.tsx, page.tsx (assembles the sections), globals.css (design tokens),
 │                           manifest.ts, sitemap.ts, robots.ts, icon.png, apple-icon.png, favicon.ico,
 │                           opengraph-image.png, twitter-image.png   (file conventions supply icons and social cards)
-├── content/                ALL copy and facts, as typed data. No copy lives in components.
+├── content/                ALL marketing copy and facts, as typed data. Components hold none of it (short interface
+│                           chrome such as "Menu", "Close menu" or an aria-label may stay in a component).
 │                           site.ts (the only place for company name, contact details, address, registration, nav),
 │                           hero, problems, about, values, services, process, sectors, why, team, clients,
 │                           packages, addons, contact, photos (image manifest), icons, copy (COPY-NEW registry)
@@ -72,9 +75,10 @@ src/
 ├── context/                ThemeContext (light/dark/system), InquiryContext (one shared enquiry dialog)
 ├── hooks/                  useDialogBehaviour, useScrollAnimation, useScrolled, useMounted
 ├── lib/                    contrast (WCAG engine + CSS token reader), mailto, format, cn, seo, themeScript
-└── test/                   setup (fails on unexpected console.error), utils, render, axe, digest (reads the Digest)
+└── test/                   setup (fails on unexpected console.error), utils (matchMedia and IntersectionObserver stubs),
+                            render, axe, digest (reads the Digest), copyRules (the rules the copy tests share)
 scripts/prepare-brand-assets.mjs     the asset pipeline (sharp)
-docs/brand-2026/                     the Digest, the update prompt, QA screenshots
+docs/brand-2026/                     the Digest, the update prompt, QA screenshots (AVIF, kept under ~3 MB)
 public/brand/                        optimised derivatives only (generated)
 ```
 
@@ -95,14 +99,20 @@ Tests live next to the code they cover (`*.test.ts` / `*.test.tsx`). `@/*` maps 
 - **Accessibility is a requirement (WCAG 2.2 AA).** Contrast is tested in `tokens.test.ts` for every pairing in all four
   colour contexts. Never put white text on `#099CC1` (3.19:1); on cyan use `#111111`. Skip link first, one `<h1>`, visible
   focus ring, 44 px targets, `inert` background and focus trap in dialogs, `aria-expanded` on the menu, alt text everywhere
-  (empty + `aria-hidden` only for decoration).
+  (empty + `aria-hidden` only for decoration). The page-wide `inert` pass also silences a dialog's own backdrop (a sibling),
+  so `Modal` dismisses on a press on the layer that holds the dialog, never on the backdrop. Following a link in the menu
+  does not send focus back to the Menu button, so the next Tab continues from the section.
 - **Motion = illumination** (things move from dim to lit). Animate transform and opacity only, with CSS and one
   IntersectionObserver; no animation library. Scroll reveals are hidden only under `html.js` (set by the inline theme script) so
-  no-JS and crawlers see everything. `prefers-reduced-motion` shows final states.
+  no-JS and crawlers see everything. If the app has not marked `<html data-hydrated>` within 6 s (a script chunk failed to
+  load), the same script drops `js` again, so a failed bundle can never leave content hidden. `prefers-reduced-motion` shows
+  final states (the theme-toggle fade included). An in-page link must aim at where an element will end up, so a reveal wrapper
+  holding the link target skips its offset (`.js .scroll-animate:is(:target, :has(:target))`).
 - **Speed is a brand principle.** Exactly one preloaded image (the hero photo, via `preload`); every other `next/image` is
   lazy; logos below the fold use `eager={false}`. No file in `public/` over 400 KB. `ssr.test.tsx` checks the real server HTML.
 - **Theme.** The inline script in `<head>` (`lib/themeScript`) applies the theme before paint; the `localStorage` key is `openavii-theme`.
-  Logos switch by CSS (`.logo-on-light` / `.logo-on-dark`), never with a mounted skeleton.
+  Each fragile call in it has its own `try`, so blocked storage still honours the system theme. Logos switch by CSS
+  (`.logo-on-light` / `.logo-on-dark`), never with a mounted skeleton.
 - React 19 lint rules are strict: no `setState` in effects (use `useSyncExternalStore`), no ref access during render.
 - Test setup fails any test that logs an unexpected `console.error` (this caught invalid HTML nesting). A test that expects an error mocks it explicitly.
 

@@ -65,6 +65,17 @@ describe('Approach', () => {
     expect(wrap).toHaveClass('is-visible');
   });
 
+  it('lights the timeline as soon as its top edge is on screen, not when a fifth of it is: a short viewport (a landscape phone, 400 % zoom) can never show a fifth of a timeline 1,500 px tall', () => {
+    const io = installIntersectionObserver();
+    const { container } = renderWithProviders(<Approach />);
+    const wrap = container.querySelector('.timeline-wrap') as HTMLElement;
+    const options = io.optionsFor(wrap);
+    expect(options, 'the timeline must be observed').toBeDefined();
+    expect(options?.threshold).toBe(0);
+    // lit once its top has cleared the bottom band of the viewport, whatever the viewport's height
+    expect(options?.rootMargin).toMatch(/-\d+%/);
+  });
+
   it('closes with the transparency statement and a call to start the journey', async () => {
     renderWithProviders(<Approach />);
     expect(screen.getByText(processClosing.statement)).toBeInTheDocument();

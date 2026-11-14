@@ -74,4 +74,8 @@ export const inquiryCopy = {
     'inquiry.note',
     'Sending opens your email app with these details pre-filled. This website does not store them.',
   ), // COPY-NEW
+  /** Shown after sending. A visitor with no mail app set up sees nothing happen, so it says what to do next. */
+  sent: newCopy('inquiry.sent', 'Your email app should now be open with your enquiry ready to send.'), // COPY-NEW
+  /** `{email}` and `{whatsapp}` are replaced by links to the company mailbox and WhatsApp number. */
+  sentFallback: newCopy('inquiry.sentFallback', 'Nothing opened? Email {email} or message us on {whatsapp}.'), // COPY-NEW
 } as const;

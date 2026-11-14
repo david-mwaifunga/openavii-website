@@ -40,6 +40,12 @@ const renderProbe = () =>
 const html = () => document.documentElement;
 
 describe('ThemeProvider', () => {
+  it('tells the inline script that the app is alive, so its no-hydration safety net stands down', () => {
+    expect(html()).not.toHaveAttribute('data-hydrated');
+    renderProbe();
+    expect(html()).toHaveAttribute('data-hydrated');
+  });
+
   it('applies a stored dark theme to <html> immediately', () => {
     localStorage.setItem(KEY, 'dark');
     renderProbe();

@@ -18,7 +18,7 @@
 
 'use client';
 
-import { useCallback, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Logo } from '@/components/ui/Logo';
@@ -36,8 +36,35 @@ export function Header() {
   const sheetId = useId();
   const { openInquiry } = useInquiry();
   const closeMenu = useCallback(() => setMenuOpen(false), []);
+  // True when the menu is closing because a link in it was followed (or because the window
+  // outgrew it): focus then must not be sent back to the Menu button (see useDialogBehaviour).
+  const skipFocusReturn = useRef(false);
 
-  useDialogBehaviour({ isOpen: menuOpen, onClose: closeMenu, containerRef: sheetRef });
+  useDialogBehaviour({
+    isOpen: menuOpen,
+    onClose: closeMenu,
+    containerRef: sheetRef,
+    restoreFocus: () => !skipFocusReturn.current,
+  });
+
+  // The Menu button is hidden from the xl breakpoint, so an open sheet must not outlive it
+  // (rotating a tablet, resizing a window): it would stay up with the page behind it inert.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const wide = window.matchMedia('(min-width: 80rem)');
+    const onChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) return;
+      skipFocusReturn.current = true; // the button that opened the sheet is hidden now
+      closeMenu();
+    };
+    wide.addEventListener('change', onChange);
+    return () => wide.removeEventListener('change', onChange);
+  }, [menuOpen, closeMenu]);
+
+  const openMenu = () => {
+    skipFocusReturn.current = false;
+    setMenuOpen(true);
+  };
 
   const quote = () => {
     closeMenu();
@@ -82,7 +109,7 @@ export function Header() {
             aria-label="Menu"
             aria-expanded={menuOpen}
             aria-controls={sheetId}
-            onClick={() => setMenuOpen(true)}
+            onClick={openMenu}
             className="grid size-11 shrink-0 place-items-center rounded-pill border border-line text-fg transition-colors hover:bg-alt xl:hidden"
           >
             <Icon name="Menu" />
@@ -119,7 +146,10 @@ export function Header() {
                 <li key={item.href} className="border-b border-line">
                   <a
                     href={item.href}
-                    onClick={closeMenu}
+                    onClick={() => {
+                      skipFocusReturn.current = true;
+                      closeMenu();
+                    }}
                     className="flex min-h-11 items-center justify-between py-4 text-h2 text-heading transition-colors hover:text-accent-text"
                   >
                     {item.label}

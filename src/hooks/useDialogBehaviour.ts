@@ -63,14 +63,23 @@ interface DialogBehaviourOptions {
   onClose: () => void;
   /** The dialog element (role="dialog"). */
   containerRef: RefObject<HTMLElement | null>;
+  /**
+   * Asked as the dialog closes: should focus return to the control that opened it?
+   * Defaults to yes. A menu closed by following one of its in-page links answers no,
+   * so the next Tab continues from the section the link led to instead of jumping
+   * back to the header (WCAG 2.4.3, focus order).
+   */
+  restoreFocus?: () => boolean;
 }
 
-export function useDialogBehaviour({ isOpen, onClose, containerRef }: DialogBehaviourOptions) {
-  // Always call the latest onClose without re-running the effect (which would
+export function useDialogBehaviour({ isOpen, onClose, containerRef, restoreFocus }: DialogBehaviourOptions) {
+  // Always call the latest callbacks without re-running the effect (which would
   // reset focus every time a parent re-renders with a new callback).
   const onCloseRef = useRef(onClose);
+  const restoreFocusRef = useRef(restoreFocus);
   useEffect(() => {
     onCloseRef.current = onClose;
+    restoreFocusRef.current = restoreFocus;
   });
 
   useEffect(() => {
@@ -118,7 +127,7 @@ export function useDialogBehaviour({ isOpen, onClose, containerRef }: DialogBeha
       document.removeEventListener('keydown', onKeyDown);
       restoreInert();
       document.body.style.overflow = previousOverflow;
-      trigger?.focus();
+      if (restoreFocusRef.current?.() ?? true) trigger?.focus();
     };
   }, [isOpen, containerRef]);
 }

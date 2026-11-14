@@ -14,8 +14,10 @@
 'use client';
 
 import { useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { inquiryCopy } from '@/content/contact';
+import { closingCta, inquiryCopy } from '@/content/contact';
+import { site } from '@/content/site';
 import {
+  INQUIRY_LIMITS,
   buildMailto,
   validateInquiry,
   type InquiryDetails,
@@ -56,7 +58,7 @@ export function InquiryModal({
   navigate = defaultNavigate,
 }: InquiryModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={inquiryCopy.titles[type]}>
+    <Modal isOpen={isOpen} onClose={onClose} title={inquiryCopy.titles[type]} closeLabel={inquiryCopy.close}>
       {/* The form lives inside the modal, so its state resets every time the dialog opens. */}
       <InquiryForm
         type={type}
@@ -80,6 +82,8 @@ function InquiryForm({
   const uid = useId();
   const [values, setValues] = useState<InquiryDetails>(EMPTY);
   const [errors, setErrors] = useState<InquiryErrors>({});
+  // True once the mail app has been asked to open: the dialog then stays up (see submit).
+  const [sent, setSent] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -95,8 +99,31 @@ function InquiryForm({
     if (found.name) return nameRef.current?.focus();
     if (found.email) return emailRef.current?.focus();
     navigate(buildMailto({ type, subjectName, priceRange, details: values }));
-    onClose();
+    // The dialog does NOT close. A visitor with no mail app set up sees nothing happen, and closing
+    // here would throw away what they typed; instead say what happened and how else to reach us.
+    setSent(true);
   };
+
+  const whatsappUrl = `${site.contact.whatsapp.url}?text=${encodeURIComponent(closingCta.whatsappMessage)}`;
+  const LINK = 'font-bold text-heading underline underline-offset-4 hover:text-accent-text';
+  // The copy carries {email} and {whatsapp} tokens; they become links to the company's own contact facts.
+  const fallback = inquiryCopy.sentFallback.split(/(\{email\}|\{whatsapp\})/).map((part, index) => {
+    if (part === '{email}') {
+      return (
+        <a key={index} href={`mailto:${site.contact.email}`} className={LINK}>
+          {site.contact.email}
+        </a>
+      );
+    }
+    if (part === '{whatsapp}') {
+      return (
+        <a key={index} href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={LINK}>
+          {closingCta.actions.whatsapp}
+        </a>
+      );
+    }
+    return part;
+  });
 
   const f = inquiryCopy.fields;
   const label = (text: string, required: boolean) => (
@@ -114,6 +141,10 @@ function InquiryForm({
         {priceRange && <p className="text-small font-bold text-accent-text">{priceRange}</p>}
       </div>
 
+      <p className="text-small text-muted">
+        {inquiryCopy.requiredNote} <span aria-hidden="true">*</span>
+      </p>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor={`${uid}-name`} className="mb-1.5 block text-small font-bold">
@@ -126,6 +157,7 @@ function InquiryForm({
             type="text"
             required
             autoComplete={f.name.autoComplete}
+            maxLength={INQUIRY_LIMITS.name}
             value={values.name}
             onChange={change('name')}
             aria-invalid={Boolean(errors.name)}
@@ -148,6 +180,7 @@ function InquiryForm({
             type="email"
             required
             autoComplete={f.email.autoComplete}
+            maxLength={INQUIRY_LIMITS.email}
             value={values.email}
             onChange={change('email')}
             aria-invalid={Boolean(errors.email)}
@@ -168,6 +201,7 @@ function InquiryForm({
             id={`${uid}-phone`}
             type="tel"
             autoComplete={f.phone.autoComplete}
+            maxLength={INQUIRY_LIMITS.phone}
             value={values.phone}
             onChange={change('phone')}
             className={FIELD}
@@ -181,6 +215,7 @@ function InquiryForm({
             id={`${uid}-company`}
             type="text"
             autoComplete={f.company.autoComplete}
+            maxLength={INQUIRY_LIMITS.company}
             value={values.company}
             onChange={change('company')}
             className={FIELD}
@@ -195,15 +230,26 @@ function InquiryForm({
         <textarea
           id={`${uid}-message`}
           rows={4}
+          maxLength={INQUIRY_LIMITS.message}
           value={values.message}
           onChange={change('message')}
           className={cn(FIELD, 'resize-y')}
         />
       </div>
 
+      {/* Always in the page, so assistive technology announces what is put into it. */}
+      <div role="status" className={sent ? 'rounded-tile border border-line bg-alt p-4 text-small' : undefined}>
+        {sent && (
+          <>
+            <p className="font-bold">{inquiryCopy.sent}</p>
+            <p className="mt-1 text-muted">{fallback}</p>
+          </>
+        )}
+      </div>
+
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Button variant="secondary" onClick={onClose}>
-          {inquiryCopy.cancel}
+          {sent ? inquiryCopy.close : inquiryCopy.cancel}
         </Button>
         <Button type="submit" iconAfter="Mail">
           {inquiryCopy.submit}

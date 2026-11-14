@@ -33,7 +33,44 @@ export interface MailtoInput {
 /** Field-level validation errors, keyed by field. */
 export type InquiryErrors = Partial<Record<'name' | 'email', string>>;
 
+/**
+ * Longest value each field accepts. The whole enquiry travels inside a mailto: link, and
+ * some mail apps (Outlook on Windows among them) cut off or refuse links longer than about
+ * 2,000 characters, so the form stops the visitor writing past what is certain to fit.
+ */
+export const INQUIRY_LIMITS = { name: 80, email: 100, phone: 30, company: 80, message: 700 } as const;
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Replace lone surrogates (what a broken paste can leave behind) with U+FFFD:
+ * encodeURIComponent throws a URIError on them, which would make sending do nothing.
+ * Written as a loop on purpose: a lookbehind regex is a syntax error in older Safari.
+ */
+function wellFormed(text: string): string {
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code >= 0xd800 && code <= 0xdbff) {
+      const next = text.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        out += text[i] + text[i + 1];
+        i++;
+      } else {
+        out += '�';
+      }
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      out += '�';
+    } else {
+      out += text[i];
+    }
+  }
+  return out;
+}
+
+/** The name with the type word after it, unless it already ends with that word ("... Services Service"). */
+const named = (name: string, word: string): string =>
+  new RegExp(`${word}s?$`, 'i').test(name) ? name : `${name} ${word}`;
 
 /** Name and e-mail are required; the e-mail must look like one. */
 export function validateInquiry(details: Pick<InquiryDetails, 'name' | 'email'>): InquiryErrors {
@@ -45,28 +82,34 @@ export function validateInquiry(details: Pick<InquiryDetails, 'name' | 'email'>)
   return errors;
 }
 
-const subjectFor = ({ type, subjectName }: MailtoInput): string => {
-  if (type === 'custom') return 'Custom Project Enquiry';
-  return `Enquiry: ${subjectName ?? ''} ${type === 'package' ? 'Package' : 'Service'}`;
+/** A package or service enquiry with no name is a custom project: the subject never has a gap in it. */
+const isCustom = ({ type, subjectName }: MailtoInput): boolean => type === 'custom' || !subjectName?.trim();
+
+const subjectFor = (input: MailtoInput): string => {
+  if (isCustom(input)) return 'Custom Project Enquiry';
+  const word = input.type === 'package' ? 'Package' : 'Service';
+  return `Enquiry: ${named(input.subjectName!.trim(), word)}`;
 };
 
-const introFor = ({ type, subjectName, priceRange }: MailtoInput): string => {
-  if (type === 'custom') return 'I am interested in discussing a custom project.';
-  const price = priceRange ? ` (${priceRange})` : '';
-  return `I am interested in the ${subjectName ?? ''} ${type}${price}.`;
+const introFor = (input: MailtoInput): string => {
+  if (isCustom(input)) return 'I am interested in discussing a custom project.';
+  const price = input.priceRange ? ` (${input.priceRange})` : '';
+  return `I am interested in the ${named(input.subjectName!.trim(), input.type)}${price}.`;
 };
 
 /** Build the `mailto:` URL for an enquiry. */
 export function buildMailto(input: MailtoInput): string {
   const { details } = input;
+  // Name and e-mail are trimmed, exactly as validateInquiry reads them.
+  const name = details.name.trim();
   const body = [
     `Hello ${site.name},`,
     '',
     introFor(input),
     '',
     '--- Client Information ---',
-    `Name: ${details.name}`,
-    `Email: ${details.email}`,
+    `Name: ${name}`,
+    `Email: ${details.email.trim()}`,
     `Phone: ${details.phone?.trim() || 'Not provided'}`,
     `Business: ${details.company?.trim() || 'Not provided'}`,
     '',
@@ -77,10 +120,10 @@ export function buildMailto(input: MailtoInput): string {
     'Looking forward to hearing from you.',
     '',
     'Best regards,',
-    details.name,
+    name,
   ].join('\r\n');
 
   return `mailto:${site.contact.email}?subject=${encodeURIComponent(
-    subjectFor(input),
-  )}&body=${encodeURIComponent(body)}`;
+    wellFormed(subjectFor(input)),
+  )}&body=${encodeURIComponent(wellFormed(body))}`;
 }

@@ -29,8 +29,8 @@ export const BRAND_COLOURS = {
 
 const title = `${site.name} | ${site.tagline}`;
 
-const description =
-  'Lusaka-based technology partner. Websites, custom software, automation and consultancy that turn complex business challenges into practical, scalable solutions.';
+/** Registered as new copy in content/site, so the owner approves it with the rest. */
+const description = site.description;
 
 export const siteMetadata: Metadata = {
   metadataBase: new URL(site.url),

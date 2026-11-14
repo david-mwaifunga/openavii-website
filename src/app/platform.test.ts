@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import nextConfig from '../../next.config';
+import { site } from '@/content/site';
 import { BRAND_COLOURS } from '@/lib/seo';
 import manifest from './manifest';
 import robots from './robots';
@@ -19,6 +20,10 @@ const publicFile = (src: string) => fileURLToPath(new URL(`../../public${src}`, 
 
 describe('manifest', () => {
   const m = manifest();
+
+  it('describes the company with the one approved description, not a second sentence of its own', () => {
+    expect(m.description).toBe(site.description);
+  });
 
   it('names the app and uses the brand colours', () => {
     expect(m.name).toBe('Openavii Technologies');

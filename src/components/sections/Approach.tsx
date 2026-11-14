@@ -25,7 +25,10 @@ import { cn } from '@/lib/cn';
 
 export function Approach() {
   const { openInquiry } = useInquiry();
-  const [timelineRef, lit] = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
+  // Lit once the timeline's top edge has risen into the viewport, never "when a fifth of it is visible":
+  // the vertical timeline is 1,500 px or more tall, and a short viewport (a landscape phone, 400 % zoom)
+  // can never show a fifth of it, so it would stay dim for ever.
+  const [timelineRef, lit] = useScrollAnimation<HTMLDivElement>({ threshold: 0, rootMargin: '0px 0px -20% 0px' });
 
   return (
     <Section id="approach" surface="page" numeral="03" labelledBy="approach-heading">

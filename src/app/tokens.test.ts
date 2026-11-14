@@ -242,6 +242,20 @@ describe('motion and accessibility rules', () => {
     expect(reduced?.body).toMatch(/transition-duration:\s*0\.0*1ms/);
   });
 
+  it('the theme-toggle colour fade also stands down for reduced motion (its !important and specificity would otherwise beat the reset above)', () => {
+    const fades = blocks.find((b) => b.selectors.some((s) => s === '.theme-transition *'));
+    expect(fades, 'missing the .theme-transition rule').toBeDefined();
+    const standDown = blocks.find(
+      (b) =>
+        b.selectors[0] === '@media (prefers-reduced-motion: reduce)' &&
+        b.body.includes('.theme-transition') &&
+        /transition:\s*none\s*!important/.test(b.body),
+    );
+    expect(standDown, 'missing a reduced-motion rule that switches .theme-transition off').toBeDefined();
+    // It must come after the fade: equal specificity and both !important, so the later rule wins.
+    expect(css.lastIndexOf('@media (prefers-reduced-motion: reduce)')).toBeGreaterThan(css.indexOf('.theme-transition *'));
+  });
+
   it('smooth scrolling is opt-in via no-preference and never applied to *', () => {
     expect(noPref, 'missing @media (prefers-reduced-motion: no-preference)').toBeDefined();
     expect(noPref?.body).toMatch(/scroll-behavior:\s*smooth/);

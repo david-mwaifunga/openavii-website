@@ -55,6 +55,7 @@ afterEach(() => {
   if (!hasDom) return;
   document.documentElement.className = '';
   document.documentElement.removeAttribute('style');
+  document.documentElement.removeAttribute('data-hydrated');
   document.body.removeAttribute('style');
   try {
     localStorage.clear();

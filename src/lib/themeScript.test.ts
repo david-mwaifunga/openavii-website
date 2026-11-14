@@ -8,8 +8,8 @@
  * @company Openavii Technologies
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import { THEME_STORAGE_KEY, themeScript } from './themeScript';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { HYDRATION_GRACE_MS, THEME_STORAGE_KEY, themeScript } from './themeScript';
 import { installMatchMedia } from '@/test/utils';
 
 /** Execute the script the way the browser does: as plain inline JavaScript. */
@@ -83,5 +83,50 @@ describe('themeScript', () => {
     });
     expect(run).not.toThrow();
     expect(html()).toHaveClass('js');
+  });
+
+  it('still follows the system preference when storage is blocked, so a dark-mode visitor never gets a light first paint', () => {
+    installMatchMedia({ dark: true });
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    run();
+    expect(html()).toHaveClass('dark');
+    expect(html().style.colorScheme).toBe('dark');
+  });
+
+  it('falls back to light, without throwing, when matchMedia is missing', () => {
+    vi.stubGlobal('matchMedia', undefined);
+    expect(run).not.toThrow();
+    expect(html()).toHaveClass('light');
+    expect(html()).toHaveClass('js');
+  });
+
+  describe('safety net for an app that never starts', () => {
+    // `.js` hides scroll-reveal content until the bundle shows it. If a script chunk fails to load,
+    // nothing would ever show it, so the gate is dropped again unless the app announces itself.
+    afterEach(() => vi.useRealTimers());
+
+    it('drops the js gate when the app has not hydrated within the grace period', () => {
+      vi.useFakeTimers();
+      run();
+      expect(html()).toHaveClass('js');
+      vi.advanceTimersByTime(HYDRATION_GRACE_MS - 1);
+      expect(html()).toHaveClass('js');
+      vi.advanceTimersByTime(1);
+      expect(html()).not.toHaveClass('js');
+    });
+
+    it('keeps the js gate once the app has marked the page as hydrated', () => {
+      vi.useFakeTimers();
+      run();
+      html().setAttribute('data-hydrated', '');
+      vi.advanceTimersByTime(HYDRATION_GRACE_MS * 2);
+      expect(html()).toHaveClass('js');
+    });
+
+    it('gives a slow connection time to start: the grace period is several seconds', () => {
+      expect(HYDRATION_GRACE_MS).toBeGreaterThanOrEqual(5000);
+    });
   });
 });

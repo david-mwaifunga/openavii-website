@@ -713,3 +713,15 @@
     fill 250ms ease,
     stroke 250ms ease !important;
 }
+
+/* The rule above is !important and more specific than the reduced-motion reset, so it needs its own
+   switch: people who ask for less motion get an instant theme change, not a 250 ms fade. It must
+   stay after the fade (equal specificity, both !important: the later rule wins). */
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
+}

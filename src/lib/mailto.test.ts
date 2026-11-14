@@ -10,7 +10,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { buildMailto, validateInquiry, type InquiryDetails } from './mailto';
+import { INQUIRY_LIMITS, buildMailto, validateInquiry, type InquiryDetails } from './mailto';
 
 const details: InquiryDetails = {
   name: 'Mulenga Banda',
@@ -83,6 +83,62 @@ describe('buildMailto', () => {
     expect(url.split('?')).toHaveLength(2);
     expect(url.split('&').length).toBe(2); // exactly subject & body
     expect(parse(url).body).toContain('a&b=c?d#e\nline two');
+  });
+
+  it('does not repeat the type word when the name already ends with it ("... Services Service")', () => {
+    const service = parse(buildMailto({ type: 'service', subjectName: 'Digital Branding Services', details }));
+    expect(service.subject).toBe('Enquiry: Digital Branding Services');
+    expect(service.body).toContain('I am interested in the Digital Branding Services.');
+    const pack = parse(buildMailto({ type: 'package', subjectName: 'Starter Package', priceRange: 'ZMW 1', details }));
+    expect(pack.subject).toBe('Enquiry: Starter Package');
+    expect(pack.body).toContain('I am interested in the Starter Package (ZMW 1).');
+  });
+
+  it('treats a package or service enquiry with no name as a custom project, never a subject with a gap in it', () => {
+    for (const type of ['package', 'service'] as const) {
+      const { subject, body } = parse(buildMailto({ type, details }));
+      expect(subject).toBe('Custom Project Enquiry');
+      expect(body).toContain('I am interested in discussing a custom project.');
+      expect(parse(buildMailto({ type, subjectName: '   ', details })).subject).toBe('Custom Project Enquiry');
+    }
+  });
+
+  it('writes the name and e-mail into the body trimmed, as validation reads them', () => {
+    const { body } = parse(
+      buildMailto({ type: 'custom', details: { ...details, name: '  Mulenga Banda  ', email: ' mulenga@example.com ' } }),
+    );
+    expect(body).toContain('Name: Mulenga Banda\r\n');
+    expect(body).toContain('Email: mulenga@example.com\r\n');
+    expect(body.endsWith('Best regards,\r\nMulenga Banda')).toBe(true);
+  });
+
+  it('survives a lone surrogate (a broken paste), which makes encodeURIComponent throw', () => {
+    const build = () => buildMailto({ type: 'custom', details: { ...details, message: 'broken \uD83D paste, and \uDE00 another' } });
+    expect(build).not.toThrow();
+    expect(build()).toContain('%EF%BF%BD'); // U+FFFD, the replacement character
+  });
+
+  it('keeps a maximum-length, ordinary-text enquiry within the ~2,000 characters some mail apps allow in a link', () => {
+    const fill = (length: number, unit: string) => unit.repeat(Math.ceil(length / unit.length)).slice(0, length);
+    const url = buildMailto({
+      type: 'service',
+      subjectName: 'Custom Business and Enterprise Software Development', // among the longest names on the site
+      details: {
+        name: fill(INQUIRY_LIMITS.name, 'Mulenga '),
+        email: fill(INQUIRY_LIMITS.email, 'mulenga.banda'),
+        phone: fill(INQUIRY_LIMITS.phone, '+260 977 000 '),
+        company: fill(INQUIRY_LIMITS.company, 'Banda and Sons '),
+        // ordinary prose with a line break roughly every 60 characters
+        message: fill(INQUIRY_LIMITS.message, 'We need a simple website for the shop.\nPlease call me after four. '),
+      },
+    });
+    expect(url.length).toBeLessThanOrEqual(2000);
+  });
+
+  it('limits every field, because a longer link may be cut off or refused by the mail app', () => {
+    expect(INQUIRY_LIMITS.message).toBeGreaterThanOrEqual(500); // room for a real brief
+    for (const value of Object.values(INQUIRY_LIMITS)) expect(value).toBeGreaterThan(0);
+    expect(Object.keys(INQUIRY_LIMITS).sort()).toEqual(['company', 'email', 'message', 'name', 'phone']);
   });
 });
 

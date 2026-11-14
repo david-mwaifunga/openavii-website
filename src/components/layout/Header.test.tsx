@@ -13,6 +13,7 @@ import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { site } from '@/content/site';
 import { renderWithProviders } from '@/test/render';
+import { installMatchMedia } from '@/test/utils';
 import { Header } from './Header';
 
 const scrollTo = (y: number) => {
@@ -85,6 +86,28 @@ describe('Header', () => {
     expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
   });
 
+  it('does not pull focus back to the menu button after a link is followed: the next Tab must continue from the section the link led to', async () => {
+    renderWithProviders(<Header />);
+    const button = screen.getByRole('button', { name: 'Menu' });
+    await userEvent.click(button);
+    const dialog = screen.getByRole('dialog', { name: 'Menu' });
+    await userEvent.click(within(dialog).getByRole('link', { name: 'Packages' }));
+    expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
+    expect(button).not.toHaveFocus();
+    // ...whereas dismissing the menu without going anywhere still returns focus (see the Escape test).
+  });
+
+  it('closes the menu when the window grows to the xl breakpoint, where its button is hidden', async () => {
+    const media = installMatchMedia({ wide: false });
+    renderWithProviders(<Header />);
+    await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
+    expect(screen.getByRole('dialog', { name: 'Menu' })).toBeInTheDocument();
+    act(() => media.setWide(true));
+    expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
+    // the page behind it is usable again
+    expect(screen.getByRole('banner').closest('[inert]')).toBeNull();
+  });
+
   it('shows the menu button only below the xl breakpoint and the bar only from it', () => {
     renderWithProviders(<Header />);
     expect(screen.getByRole('button', { name: 'Menu' }).className).toContain('xl:hidden');
@@ -102,8 +125,19 @@ describe('Header', () => {
     expect(screen.getByRole('button', { name: /Switch to (dark|light) theme/ })).toBeInTheDocument();
   });
 
-  it('keeps the bar keyboard-friendly: every action is at least 44 px', () => {
+  it('keeps the bar keyboard-friendly: every action in it carries a 44 px minimum', () => {
     renderWithProviders(<Header />);
-    expect(screen.getByRole('button', { name: 'Menu' }).className).toMatch(/size-11|h-11/);
+    const nav = screen.getByRole('navigation', { name: 'Primary' });
+    const actions = [
+      screen.getByRole('button', { name: 'Menu' }),
+      screen.getByRole('button', { name: /Switch to (dark|light) theme/ }),
+      screen.getByRole('button', { name: 'Get a Quote' }),
+      ...within(nav).getAllByRole('link'),
+    ];
+    expect(actions).toHaveLength(3 + site.nav.length);
+    for (const action of actions) {
+      const name = action.getAttribute('aria-label') ?? action.textContent;
+      expect(action.className, `"${name}" needs size-11, h-11 or min-h-11`).toMatch(/(^|\s)(size-11|h-11|min-h-11)(\s|$)/);
+    }
   });
 });

@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import { renderToString } from 'react-dom/server';
 import { InquiryProvider, ThemeProvider } from '@/context';
 import { sectionIds, site } from '@/content/site';
+import { photos } from '@/content/photos';
 import { services } from '@/content/services';
 import { AMERICAN_SPELLING, BANNED_FILLER, INVENTED_CLAIMS, UNAPPROVED_REGISTRATIONS } from '@/test/copyRules';
 import Home from './page';
@@ -58,12 +59,12 @@ describe('home page, server-rendered', () => {
     expect(hints[0]).toContain('commuter-laptop');
   });
 
-  describe('every word the visitor can read (components and content together)', () => {
-    // Visible text only: no scripts, styles or markup, and decoded entities.
-    const text = html
-      .replace(/<script[\s\S]*?<\/script>/g, ' ')
-      .replace(/<style[\s\S]*?<\/style>/g, ' ')
-      .replace(/<[^>]+>/g, ' ')
+  describe('every word the visitor can read or hear (components and content together)', () => {
+    // Visible text, plus the text a screen reader announces from attributes (alt, aria-label, title): the copy
+    // rules apply to both. No scripts, styles or markup, and decoded entities.
+    const page = html.replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<style[\s\S]*?<\/style>/g, ' ');
+    const attributeText = [...page.matchAll(/\s(?:alt|aria-label|title)="([^"]*)"/g)].map((match) => match[1]).join(' ');
+    const text = `${page.replace(/<[^>]+>/g, ' ')} ${attributeText}`
       .replace(/&amp;/g, '&')
       .replace(/&#x27;|&#39;/g, "'")
       .replace(/&quot;/g, '"')
@@ -71,6 +72,13 @@ describe('home page, server-rendered', () => {
 
     it('is a substantial body of copy (guard against a vacuous scan)', () => {
       expect(text.length).toBeGreaterThan(15000);
+    });
+
+    it('includes the text assistive technology announces, not just what is drawn', () => {
+      expect(attributeText.length).toBeGreaterThan(500);
+      expect(attributeText).toContain('Primary'); // the primary navigation's accessible name
+      // a photograph's description exists only as an alt attribute, so finding it proves attributes are audited
+      expect(text).toContain(photos['commuter-laptop'].alt);
     });
 
     it.each(BANNED_FILLER.map(([label, pattern]) => [label, pattern] as const))('contains no banned filler: %s', (_label, pattern) => {

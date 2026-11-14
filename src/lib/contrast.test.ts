@@ -80,6 +80,19 @@ describe('resolveColor', () => {
     expect(toHex(resolveColor('color-mix(in srgb, #000000 25%, #ffffff 75%)', {}))).toBe('#bfbfbf');
   });
 
+  it('scales alpha by the percentages when they total less than 100 % (CSS Color 5), so a faded mix is never read as opaque', () => {
+    // 30 % + 30 % of two opaque colours is a 60 %-opaque 50/50 blend, not an opaque one: a contrast
+    // test fed the opaque value would pass for text that is really lighter than it looks.
+    const [r, , b, alpha] = resolveColor('color-mix(in srgb, #ff0000 30%, #0000ff 30%)', {});
+    expect(alpha).toBeCloseTo(0.6);
+    expect(r).toBeCloseTo(127.5);
+    expect(b).toBeCloseTo(127.5);
+    // totals above 100 % are normalised and stay opaque
+    expect(resolveColor('color-mix(in srgb, #ff0000 80%, #0000ff 80%)', {})[3]).toBeCloseTo(1);
+    // exactly 100 % is untouched
+    expect(resolveColor('color-mix(in srgb, #ff0000 60%, #0000ff 40%)', {})[3]).toBeCloseTo(1);
+  });
+
   it('handles nested color-mix()', () => {
     const nested = 'color-mix(in srgb, color-mix(in srgb, #000000 50%, #ffffff) 50%, #ffffff)';
     // Intermediates stay in floating point, as in browsers: 127.5 -> 191.25 -> rounds to 191 (#bf).

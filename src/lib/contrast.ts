@@ -218,9 +218,12 @@ function mixColors(args: string, tokens: TokenMap, depth: number): RGBA {
   const w2 = (p2 as number) / sum;
 
   const [a, b] = [parsed[0].color, parsed[1].color];
-  const alpha = a[3] * w1 + b[3] * w2;
+  const mixedAlpha = a[3] * w1 + b[3] * w2;
   const channel = (i: number) =>
-    alpha === 0 ? 0 : (a[i] * a[3] * w1 + b[i] * b[3] * w2) / alpha;
+    mixedAlpha === 0 ? 0 : (a[i] * a[3] * w1 + b[i] * b[3] * w2) / mixedAlpha;
+  // CSS Color 5: percentages totalling less than 100 % leave the mix partly transparent,
+  // by exactly that fraction (totals above 100 % are only normalised).
+  const alpha = mixedAlpha * Math.min(sum / 100, 1);
   return [channel(0), channel(1), channel(2), alpha];
 }
 

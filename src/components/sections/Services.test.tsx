@@ -64,6 +64,16 @@ describe('Services', () => {
     expect(dialog).toHaveTextContent('Selected service');
   });
 
+  it('lets a screen-reader user tell the 15 identical "Get a Quote" buttons apart: each is described by its own tile heading, and its label comes from the content layer', () => {
+    renderWithProviders(<Services />);
+    const tiles = screen.getAllByRole('article');
+    services.forEach((service, i) => {
+      const button = within(tiles[i]).getByRole('button', { name: new RegExp(servicesSection.quoteLabel) });
+      expect(button).toHaveTextContent(servicesSection.quoteLabel);
+      expect(button).toHaveAccessibleDescription(service.title);
+    });
+  });
+
   it('interleaves brand photographs between the tiles, with factual alt text', () => {
     renderWithProviders(<Services />);
     for (const id of ['phone-coffee', 'partnership-handshake'] as const) {
