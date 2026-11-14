@@ -102,7 +102,7 @@ export function Header() {
           className="fixed inset-0 z-50 flex flex-col overflow-y-auto"
         >
           <div className="wrap flex h-[var(--header-h)] shrink-0 items-center justify-between">
-            <Logo variant="full" tone="white" className="w-36 sm:w-44" />
+            <Logo variant="full" tone="white" className="w-36 sm:w-44" eager={false} />
             <button
               type="button"
               aria-label="Close menu"

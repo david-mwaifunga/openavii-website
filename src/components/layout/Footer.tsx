@@ -27,7 +27,7 @@ export function Footer() {
           <div className="lg:col-span-4">
             {/* The clear space is built into the logo box; pull the box out so the artwork itself lines up with the text. */}
             <div className="-ml-[18px] -mt-[18px]">
-              <Logo variant="extended" tone="white" width={300} clearSpace />
+              <Logo variant="extended" tone="white" width={300} clearSpace eager={false} />
             </div>
             <p className="mt-4 max-w-xs text-lead font-light text-muted">{site.tagline}</p>
           </div>

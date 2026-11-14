@@ -33,11 +33,23 @@ describe('Logo', () => {
     expect(container.querySelector('.logo-on-dark')).not.toBeNull();
   });
 
-  it('loads both images eagerly (a lazy hidden logo would pop in late)', () => {
+  it('loads both images eagerly by default (a lazy hidden logo would pop in late when the theme or header changes)', () => {
     const { container } = render(<Logo variant="full" />);
     for (const img of container.querySelectorAll('img')) {
       expect(img).not.toHaveAttribute('loading', 'lazy');
     }
+  });
+
+  it('keeps eager logos low priority, so they never compete with the LCP photograph', () => {
+    const { container } = render(<Logo variant="full" />);
+    for (const img of container.querySelectorAll('img')) {
+      expect(img).toHaveAttribute('fetchpriority', 'low');
+    }
+  });
+
+  it('can be lazy for a logo below the fold (no preload hint, no early request)', () => {
+    const { container } = render(<Logo variant="extended" tone="white" eager={false} />);
+    expect(container.querySelector('img')).toHaveAttribute('loading', 'lazy');
   });
 
   it('renders a single image when the tone is fixed', () => {

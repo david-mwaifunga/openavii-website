@@ -4,7 +4,8 @@
  * alternate so no two neighbours match (dark, page, alt, brand, page, alt,
  * brand, page, alt, dark), with curved dividers where fixed brand surfaces
  * meet the theme-following ones. <ShapeDefs /> supplies the brand-shape clip
- * paths used by framed photographs anywhere on the page.
+ * paths used by framed photographs anywhere on the page; <JsonLd /> publishes
+ * the Organization structured data.
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
@@ -23,11 +24,14 @@ import {
   WhoWeAre,
   Why,
 } from '@/components/sections';
+import { JsonLd } from '@/components/seo';
 import { ShapeDefs } from '@/components/ui';
+import { organizationJsonLd } from '@/lib/seo';
 
 export default function Home() {
   return (
     <>
+      <JsonLd data={organizationJsonLd()} />
       <SkipLink />
       <ShapeDefs />
       <Header />

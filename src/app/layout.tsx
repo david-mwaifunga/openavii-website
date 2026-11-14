@@ -1,15 +1,16 @@
 /**
  * Root Layout
- * Fonts (Geist only), the pre-hydration theme script, and the theme provider.
- * Metadata, structured data and social cards are added in the SEO phase.
+ * Fonts (Geist only), page metadata, the pre-hydration theme script, and the
+ * theme and enquiry providers.
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
  */
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { InquiryProvider, ThemeProvider } from "@/context";
+import { siteMetadata, siteViewport } from "@/lib/seo";
 import { themeScript } from "@/lib/themeScript";
 import "./globals.css";
 
@@ -24,25 +25,12 @@ const geist = Geist({
 });
 
 /**
- * Site metadata for SEO and social sharing.
+ * Page metadata and viewport come from lib/seo (built from content/site).
  * Icons are supplied by the file conventions in this folder
- * (icon.png, apple-icon.png, favicon.ico), not declared here.
+ * (icon.png, apple-icon.png, favicon.ico, opengraph-image.png), not declared here.
  */
-export const metadata: Metadata = {
-  title: {
-    default: "Openavii Technologies | Illuminating Your Digital Journey",
-    template: "%s | Openavii Technologies",
-  },
-  description:
-    "Lusaka-based technology partner. Websites, custom software, automation and consultancy that turn complex business challenges into practical, scalable solutions.",
-  authors: [{ name: "David Mwaifunga" }],
-  creator: "David Mwaifunga",
-  publisher: "Openavii Technologies Limited",
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+export const metadata: Metadata = siteMetadata;
+export const viewport: Viewport = siteViewport;
 
 /**
  * Root layout component.

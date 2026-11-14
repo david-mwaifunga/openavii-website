@@ -52,7 +52,7 @@ export function WhoWeAre() {
           className="mt-20 grid items-center gap-10 rounded-tile border border-line bg-surface p-8 lg:grid-cols-12 lg:p-12"
         >
           <div className="lg:col-span-3">
-            <Logo variant="mark" decorative width={168} />
+            <Logo variant="mark" decorative width={168} eager={false} />
           </div>
           <div className="lg:col-span-9">
             <h3 id="name-heading" className="text-overline uppercase text-accent-text">

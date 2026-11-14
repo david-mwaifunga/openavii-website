@@ -12,6 +12,10 @@
  *     which needs an explicit `width` to compute it)
  *   - true proportions (height: auto; intrinsic width/height from the artwork)
  *
+ * Loading: both tone images are in the markup, so above the fold they are eager (the hidden
+ * one is ready for the theme switch) but low priority; below the fold use eager={false}.
+ * React hoists a preload hint for every non-lazy, non-low-priority <img>, which is why.
+ *
  * @author David Mwaifunga
  * @company Openavii Technologies
  */
@@ -31,6 +35,12 @@ interface LogoProps {
   clearSpace?: boolean;
   /** Empty alt text, for a logo that repeats adjacent text. */
   decorative?: boolean;
+  /**
+   * Load at once (default) or lazily. Above the fold, both tone images are eager so the
+   * hidden one is ready when the theme or header state changes; eager logos are low priority
+   * so they never compete with the LCP photograph. Use eager={false} below the fold.
+   */
+  eager?: boolean;
   /** Classes for the image(s): size them here when `width` is not given. */
   className?: string;
 }
@@ -41,6 +51,7 @@ export function Logo({
   width,
   clearSpace = false,
   decorative = false,
+  eager = true,
   className,
 }: LogoProps) {
   const logo = logos[variant];
@@ -56,7 +67,8 @@ export function Logo({
       width={logo.width}
       height={logo.height}
       unoptimized
-      loading="eager"
+      loading={eager ? 'eager' : 'lazy'}
+      fetchPriority={eager ? 'low' : undefined}
       className={cn(toneClass, className)}
       style={{
         width: rendered === undefined ? undefined : `${rendered}px`,
