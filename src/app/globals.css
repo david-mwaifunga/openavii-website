@@ -1,8 +1,23 @@
 /**
- * Global Styles
- * Main stylesheet for Openavii Technologies website.
- * Includes Tailwind CSS, custom properties, and animations.
- * Supports both light and dark themes with mobile-first approach.
+ * Global styles - Openavii Technologies 2026 brand system
+ *
+ * Single source of truth for design tokens. Layers, in order:
+ *   1. Raw brand tokens      (Digest §4.2 / §4.3) - never used directly by components
+ *   2. Semantic tokens       (what components use) - per colour context
+ *   3. Tailwind mapping      (@theme) - utilities resolve to the semantic tokens
+ *   4. Base, surfaces and shared brand devices
+ *   5. Motion ("illumination": things move from dim to lit)
+ *
+ * Colour contexts. `page` and `alt` sections follow the theme (light or dark).
+ * `data-surface="dark"` and `data-surface="brand"` are fixed brand surfaces
+ * that look the same in both themes: they redefine the semantic tokens
+ * locally, so one component is correct everywhere. Rule that keeps this
+ * honest (enforced by tokens.test.ts): semantic tokens reference only raw
+ * brand/theme tokens, never each other.
+ *
+ * Contrast is enforced for every pairing in tokens.test.ts, in all four
+ * contexts. Cyan #099CC1 never carries white text (3.19:1); on it the brand
+ * uses #111111 (5.88:1).
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
@@ -10,870 +25,616 @@
 
 @import "tailwindcss";
 
-/* ============================================
-   Tailwind CSS 4 Dark Mode Configuration
-   Use class-based dark mode (applied to html element)
-   Selector targets the .dark element itself AND all descendants
-   ============================================ */
+/* Keep documentation and tooling out of Tailwind's class scan. */
+@source not "../../docs";
+@source not "../../scripts";
 
+/* Tailwind's `dark:` variant follows the <html> class only. Colour differences
+   between surfaces are handled by the semantic tokens, so components rarely
+   need it (logo switching is plain CSS below). */
 @custom-variant dark (&:is(.dark, .dark *));
 
-/* ============================================
-   CSS Custom Properties (Design Tokens)
-   Light Theme (Default)
-   ============================================ */
+/* ==========================================================================
+   1. Raw brand tokens and the light theme
+   ========================================================================== */
 
 :root {
-  /* Theme indicator */
-  --theme: light;
+  color-scheme: light;
 
-  /* ------------------------------------------------------------------
-     Openavii Technologies - Approved Brand Palette (single source of
-     truth). These raw tokens mirror the brand guidelines exactly.
-     Semantic + Tailwind tokens below are all derived from these.
-     ------------------------------------------------------------------ */
+  /* RAW - Digest §4.2 */
+  --brand-navy: #223450; /* primary: trust, stability */
+  --brand-deep: #1D4A68; /* secondary: depth in gradients */
+  --brand-teal: #146F91; /* supporting: modern energy */
+  --brand-cyan: #099CC1; /* accent: highlights, rules, large type, never under white text */
+  --brand-cyan-bright: #00C0EC; /* accent for small text and fills on dark surfaces */
+  --brand-white: #FEFEFE;
+  --brand-mist: #F2F2F2;
+  --brand-depth: #111111;
+  --brand-green: #02AF17; /* sustainability gradients only; fails AA with white */
 
-  /* Navy brand family (from logo #233550) */
-  --color-primary: #233550;        /* Main brand navy */
-  --color-primary-dark: #162235;   /* Deep navy - dark sections, footer */
-  --color-primary-light: #526784;  /* Muted navy - subtle accents */
-  --color-primary-tint: #e8edf3;   /* Pale navy - chips, icon containers */
+  /* RAW - Digest §4.3 gradients (measured from the supplied artwork) */
+  --grad-divider: linear-gradient(90deg, #233550 0%, #1D4F6C 20%, #156C8C 40%, #0E88AB 60%, #07A5CB 80%, #01BFE7 100%);
+  --grad-panel: radial-gradient(120% 100% at 100% 0%, #0A94B9 0%, transparent 55%), linear-gradient(180deg, #146B8D 0%, #185A7A 50%, #203653 100%);
+  /* The `brand` band. Its stops are kept dark on purpose: both white text and
+     small bright-cyan text stay at AA across the whole band. The full
+     navy-to-cyan divider above is decorative (rules and edges), never under text. */
+  --grad-band: linear-gradient(135deg, var(--brand-navy) 0%, color-mix(in srgb, var(--brand-navy) 60%, var(--brand-deep)) 100%);
 
-  /* Accent - electric blue (primary CTA) */
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
-  --color-accent-secondary: #06b6d4; /* Cyan - tech accent (sparingly) */
-  --color-accent-soft: #cffafe;      /* Soft cyan wash */
+  /* THEME-LEVEL colours: what neighbouring `page` / `alt` sections look like in the
+     active theme. Surfaces never redefine these, so a curve divider painted inside a
+     dark or brand band can still match the flat section next to it. */
+  --theme-page: var(--brand-white);
+  --theme-alt: var(--brand-mist);
 
-  /* Neutrals - backgrounds & surfaces */
-  --color-background: #ffffff;
-  --color-background-secondary: #f7f9fc;
-  --color-surface: #ffffff;
+  /* SEMANTIC - light theme */
+  --page: var(--brand-white);
+  --surface: var(--brand-white);
+  --surface-alt: var(--brand-mist);
+  --fg: var(--brand-navy);
+  --fg-muted: color-mix(in srgb, var(--brand-navy) 78%, var(--brand-white));
+  --heading: var(--brand-navy);
+  --accent-text: var(--brand-teal); /* small accent text and links on light */
+  --accent-fill: var(--brand-cyan); /* fills, rules, large display accents */
+  --on-accent: var(--brand-depth); /* text on accent fills */
+  --btn-primary-bg: var(--brand-navy);
+  --btn-primary-fg: var(--brand-white);
+  --btn-primary-hover: var(--brand-teal);
+  --line: color-mix(in srgb, var(--brand-navy) 14%, var(--brand-white));
+  --focus: var(--brand-teal);
+  --ghost: color-mix(in srgb, var(--brand-cyan) 14%, transparent); /* ghost numerals */
+  --scrim: color-mix(in srgb, var(--brand-navy) 88%, transparent); /* navy scrim over photography */
 
-  /* Neutrals - text */
-  --color-text-primary: #172033;
-  --color-text-secondary: #5f6b7a;
-  --color-text-muted: #8a95a3;
+  /* Colour-blocked service tiles (Digest §4.5-7): fixed pairs, identical in both themes.
+     Each tile steps one palette colour lighter on hover; the text colour steps with it. */
+  --tile-navy-bg: var(--brand-navy);
+  --tile-navy-fg: var(--brand-white);
+  --tile-navy-fg-muted: color-mix(in srgb, var(--brand-white) 86%, var(--brand-navy));
+  --tile-deep-bg: var(--brand-deep);
+  --tile-deep-fg: var(--brand-white);
+  --tile-deep-fg-muted: color-mix(in srgb, var(--brand-white) 86%, var(--brand-deep));
+  --tile-teal-bg: var(--brand-teal);
+  --tile-teal-fg: var(--brand-white);
+  --tile-teal-fg-muted: color-mix(in srgb, var(--brand-white) 90%, var(--brand-teal));
+  --tile-cyan-bg: var(--brand-cyan);
+  --tile-cyan-fg: var(--brand-depth);
+  --tile-cyan-fg-muted: color-mix(in srgb, var(--brand-depth) 86%, var(--brand-cyan));
+  --tile-bright-bg: var(--brand-cyan-bright);
+  --tile-bright-fg: var(--brand-depth);
 
-  /* Border */
-  --color-border: #dce3ea;
-
-  /* Status */
-  --color-success: #16a34a;
-  --color-warning: #f59e0b;
-  --color-error: #dc2626;
-  --color-info: #0284c7;
-
-  /* ------------------------------------------------------------------
-     Semantic aliases consumed by @theme + raw CSS. Kept separate from
-     the palette so dark mode can remap them without touching the
-     brand hues above.
-     ------------------------------------------------------------------ */
-  --page: var(--color-background);
-  --surface: var(--color-surface);
-  --surface-2: var(--color-background-secondary);
-  --surface-3: var(--color-primary-tint);
-  --line: var(--color-border);
-
-  --fg: var(--color-text-primary);
-  --fg-muted: var(--color-text-secondary);
-  --fg-subtle: var(--color-text-muted);
-  --heading: var(--color-primary);
-
-  /* Accent used for text/icon/border/ring - flips lighter in dark */
-  --accent: var(--color-accent);
-  --accent-hover: var(--color-accent-hover);
-  /* Accent used for filled buttons (white text) - constant for contrast */
-  --accent-solid: #2563eb;
-  --accent-solid-hover: #1d4ed8;
-  --cyan: var(--color-accent-secondary);
-  /* Deeper cyan for text/icons on light surfaces (AA-safe); brightens in dark */
-  --cyan-strong: #0e7490;
-
-  /* Legacy aliases so existing raw-CSS consumers keep resolving */
-  --background: var(--page);
-  --background-secondary: var(--surface-2);
-  --background-tertiary: var(--surface-3);
-  --foreground: var(--fg);
-  --foreground-secondary: var(--fg-muted);
-  --foreground-muted: var(--fg-subtle);
-  --surface-elevated: var(--surface);
-  --border: var(--line);
-
-  /* Approved brand gradient (135deg deep navy → navy) */
-  --gradient-brand: linear-gradient(135deg, #162235 0%, #233550 100%);
-
-  /* Shadow colors - Light theme */
-  --shadow-color: rgba(22, 34, 53, 0.10);
-  --shadow-colored: rgba(37, 99, 235, 0.15);
-
-  /* Glass effect - Light theme */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.85);
+  /* Layout */
+  --header-h: 4.5rem;
 }
 
-/* ============================================
-   Dark Theme
-   ============================================ */
+/* Dark theme, and the two fixed brand surfaces, share one set of semantic tokens. */
+.dark,
+[data-surface="dark"],
+[data-surface="brand"] {
+  color-scheme: dark;
 
+  --page: var(--brand-depth);
+  --surface: color-mix(in srgb, var(--brand-navy) 40%, var(--brand-depth));
+  --surface-alt: color-mix(in srgb, var(--brand-navy) 22%, var(--brand-depth));
+  --fg: var(--brand-white);
+  --fg-muted: color-mix(in srgb, var(--brand-white) 72%, var(--brand-navy));
+  --heading: var(--brand-white);
+  --accent-text: var(--brand-cyan-bright);
+  --accent-fill: var(--brand-cyan-bright);
+  --on-accent: var(--brand-depth);
+  --btn-primary-bg: var(--brand-cyan-bright);
+  --btn-primary-fg: var(--brand-depth);
+  --btn-primary-hover: var(--brand-white);
+  --line: color-mix(in srgb, var(--brand-white) 14%, transparent);
+  --focus: var(--brand-cyan-bright);
+  --ghost: color-mix(in srgb, var(--brand-cyan-bright) 12%, transparent);
+  --scrim: color-mix(in srgb, var(--brand-depth) 80%, transparent);
+}
+
+/* In the dark theme the neighbouring flat sections are dark too. */
 .dark {
-  --theme: dark;
-
-  /* Dark surfaces built from the navy family (#162235 / #233550) */
-  --color-background: #0e1622;          /* Page - deep navy-black */
-  --color-background-secondary: #16233a; /* Subtle raised surface */
-  --color-surface: #172538;             /* Card surface */
-  --color-primary-tint: #223451;        /* Navy chip / icon container */
-
-  /* Text - light neutrals with accessible contrast on navy */
-  --color-text-primary: #e8edf3;
-  --color-text-secondary: #a7b2c0;
-  --color-text-muted: #78838f;
-
-  /* Border - soft navy line */
-  --color-border: #2c3b54;
-
-  /* Accent brightens slightly for contrast on dark navy */
-  --color-accent: #3b82f6;
-  --color-accent-hover: #60a5fa;
-  --color-accent-secondary: #22d3ee;
-  --color-accent-soft: rgba(37, 99, 235, 0.16);
-  /* On dark surfaces cyan can be bright and still readable */
-  --cyan-strong: #22d3ee;
-
-  /* Headings become near-white in dark mode */
-  --heading: #f1f5fa;
-
-  /* Filled primary buttons keep a strong blue for white-text contrast */
-  --accent-solid: #2563eb;
-  --accent-solid-hover: #1d4ed8;
-
-  /* Shadow colors - Dark theme */
-  --shadow-color: rgba(0, 0, 0, 0.45);
-  --shadow-colored: rgba(37, 99, 235, 0.25);
-
-  /* Glass effect - Dark theme */
-  --glass-bg: rgba(23, 37, 56, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --theme-page: var(--brand-depth);
+  --theme-alt: color-mix(in srgb, var(--brand-navy) 22%, var(--brand-depth));
 }
 
-/* ============================================
-   Tailwind Theme Extensions
-   ============================================ */
+/* The `brand` band: its flat equivalents are the lightest stop of --grad-band
+   (the worst case for text) and slightly deeper navy for cards sitting on it. */
+[data-surface="brand"] {
+  --page: color-mix(in srgb, var(--brand-navy) 60%, var(--brand-deep));
+  --surface: color-mix(in srgb, var(--brand-depth) 28%, var(--brand-navy));
+  --surface-alt: color-mix(in srgb, var(--brand-depth) 40%, var(--brand-navy));
+}
+
+/* ==========================================================================
+   2. Tailwind mapping
+   ========================================================================== */
+
+@theme {
+  /* Only brand colours exist: drop Tailwind's default palette so off-brand hues
+     cannot be used by accident. */
+  --color-*: initial;
+
+  /* Type scale (Prompt §4.2). Headlines are ExtraBold and tightly tracked. */
+  --text-h1: clamp(2.75rem, 1.2rem + 6.2vw, 6.5rem);
+  --text-h1--line-height: 0.98;
+  --text-h1--letter-spacing: -0.04em;
+  --text-h1--font-weight: 800;
+  --text-h2: clamp(2.25rem, 1.2rem + 3.6vw, 4.75rem);
+  --text-h2--line-height: 1.02;
+  --text-h2--letter-spacing: -0.035em;
+  --text-h2--font-weight: 800;
+  --text-h3: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+  --text-h3--line-height: 1.15;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 700;
+  --text-h4: 1.25rem;
+  --text-h4--line-height: 1.3;
+  --text-h4--letter-spacing: -0.01em;
+  --text-h4--font-weight: 700;
+  --text-lead: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+  --text-lead--line-height: 1.5;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.65;
+  --text-small: 0.9375rem;
+  --text-small--line-height: 1.55;
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 1.2;
+  --text-overline--letter-spacing: 0.18em;
+  --text-overline--font-weight: 700;
+
+  /* Shape and layout language */
+  --radius-tile: 6px; /* crisp, never pillowy */
+  --radius-pill: 999px; /* buttons */
+  --container-wrap: 80rem; /* 1280px */
+  --spacing-section: clamp(4.5rem, 3rem + 7vw, 9rem);
+
+  /* Motion */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
 @theme inline {
-  /* Core surfaces / text - theme-aware (flip automatically in dark) */
-  --color-background: var(--page);
-  --color-foreground: var(--fg);
+  /* Surfaces and text: resolved where they are used, so data-surface scopes work. */
   --color-page: var(--page);
   --color-surface: var(--surface);
-  --color-surface-muted: var(--surface-2);
-  --color-surface-tint: var(--surface-3);
-  --color-line: var(--line);
-
+  --color-alt: var(--surface-alt);
   --color-fg: var(--fg);
-  --color-fg-muted: var(--fg-muted);
-  --color-fg-subtle: var(--fg-subtle);
+  --color-muted: var(--fg-muted);
   --color-heading: var(--heading);
+  --color-accent-text: var(--accent-text);
+  --color-accent-fill: var(--accent-fill);
+  --color-on-accent: var(--on-accent);
+  --color-btn: var(--btn-primary-bg);
+  --color-on-btn: var(--btn-primary-fg);
+  --color-btn-hover: var(--btn-primary-hover);
+  --color-line: var(--line);
+  --color-focus: var(--focus);
+  --color-ghost: var(--ghost);
+  --color-scrim: var(--scrim);
+  --color-theme-page: var(--theme-page);
+  --color-theme-alt: var(--theme-alt);
 
-  /* Navy brand family - constant across themes (for navy fills/borders) */
-  --color-navy: var(--color-primary);
-  --color-navy-dark: var(--color-primary-dark);
-  --color-navy-light: var(--color-primary-light);
-  --color-navy-tint: var(--surface-3);
+  /* Fixed brand colours, for deliberately colour-blocked elements only. */
+  --color-navy: var(--brand-navy);
+  --color-deep: var(--brand-deep);
+  --color-teal: var(--brand-teal);
+  --color-cyan: var(--brand-cyan);
+  --color-cyan-bright: var(--brand-cyan-bright);
+  --color-brand-white: var(--brand-white);
+  --color-mist: var(--brand-mist);
+  --color-depth: var(--brand-depth);
 
-  /* Accent (electric blue) + cyan tech accent */
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-solid: var(--accent-solid);
-  --color-accent-solid-hover: var(--accent-solid-hover);
-  --color-accent-soft: var(--color-accent-soft);
-  --color-cyan: var(--cyan);
-  --color-cyan-strong: var(--cyan-strong);
-
-  /* Status */
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-error: var(--color-error);
-  --color-info: var(--color-info);
-
-  /* Font variables are injected by Next.js font system at runtime */
-  --font-sans: var(--font-geist-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-  --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace);
+  /* Geist is the only brand typeface (the variable font loaded by next/font). */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* ============================================
-   Base Styles (Mobile-First)
-   ============================================ */
+/* ==========================================================================
+   3. Base
+   ========================================================================== */
 
-* {
-  scroll-behavior: smooth;
-}
+@layer base {
+  html {
+    scroll-padding-top: calc(var(--header-h) + 0.5rem);
+    -webkit-text-size-adjust: 100%;
+  }
 
-html {
-  /* Prevent flash of wrong theme */
-  color-scheme: light dark;
-}
+  body {
+    background-color: var(--page);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  /* Fallback list lives inside var() - the runtime-injected next/font
-     variable may be absent, and a bare var() would otherwise invalidate
-     the whole declaration. */
-  font-family: var(--font-geist-sans, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--heading);
+    text-wrap: balance;
+  }
 
-/* Custom scrollbar - adapts to theme */
-::-webkit-scrollbar {
-  width: 8px;
-}
+  h1 {
+    font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+    letter-spacing: var(--text-h1--letter-spacing);
+    font-weight: 800;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--background-secondary);
-}
+  h2 {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    letter-spacing: var(--text-h2--letter-spacing);
+    font-weight: 800;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--color-primary-light), var(--color-primary));
-  border-radius: 4px;
-}
+  h3 {
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+    letter-spacing: var(--text-h3--letter-spacing);
+    font-weight: 700;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-dark));
-}
+  h4 {
+    font-size: var(--text-h4);
+    line-height: var(--text-h4--line-height);
+    letter-spacing: var(--text-h4--letter-spacing);
+    font-weight: 700;
+  }
 
-/* Larger scrollbar on desktop */
-@media (min-width: 768px) {
-  ::-webkit-scrollbar {
-    width: 10px;
+  /* Comfortable measure for running text. */
+  p {
+    max-width: 68ch;
+  }
+
+  /* A visible 2px focus ring on every interactive element, in the surface's own focus colour. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--brand-cyan) 32%, transparent);
+    color: inherit;
   }
 }
 
-/* Selection styling */
-::selection {
-  background: rgba(37, 99, 235, 0.22);
-  color: var(--foreground);
+/* ==========================================================================
+   4. Surfaces
+   ========================================================================== */
+
+[data-surface] {
+  color: var(--fg);
 }
 
-/* ============================================
-   Custom Animations
-   ============================================ */
-
-/* Floating animation for background orbs */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  50% {
-    transform: translateY(-10px) translateX(-10px);
-  }
-  75% {
-    transform: translateY(-30px) translateX(5px);
-  }
+[data-surface="dark"] {
+  background-color: var(--page);
 }
 
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(15px) translateX(-15px);
-  }
-  50% {
-    transform: translateY(-15px) translateX(10px);
-  }
-  75% {
-    transform: translateY(10px) translateX(-5px);
-  }
+[data-surface="brand"] {
+  background-color: var(--page);
+  background-image: var(--grad-band);
 }
 
-/* Subtle pulse animation */
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
+/* Sections that hold ghost numerals, shaped photos or curved dividers clip them,
+   so an oversized device can never cause horizontal scroll. */
+.section-clip {
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* ==========================================================================
+   5. Shared brand devices and utilities
+   ========================================================================== */
+
+/* Page container: 1280px max, gutters 16 / 24 / 40. */
+@utility wrap {
+  width: 100%;
+  max-width: var(--container-wrap);
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @media (min-width: 40rem) {
+    padding-inline: 1.5rem;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
+
+  @media (min-width: 64rem) {
+    padding-inline: 2.5rem;
   }
 }
 
-@keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
+/* The logo masters come in a colour and an all-white version; the right one is
+   chosen by CSS alone, so there is no flash, skeleton or layout shift. */
+.logo-on-light {
+  display: block;
 }
 
-/* Fade in animations */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.logo-on-dark {
+  display: none;
 }
 
-@keyframes fade-in-down {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+:is(.dark, [data-surface="dark"], [data-surface="brand"]) .logo-on-light {
+  display: none;
 }
 
-/* Scroll indicator animation */
-@keyframes scroll-down {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(6px);
-    opacity: 0.5;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+:is(.dark, [data-surface="dark"], [data-surface="brand"]) .logo-on-dark {
+  display: block;
 }
 
-/* Gradient shimmer effect */
-@keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
+/* Colour-blocked tile (Digest §4.5-7). `data-tone` picks the palette pair and its
+   hover step: navy > deep > teal > cyan > bright cyan. */
+.tile {
+  --tile-bg: var(--tile-navy-bg);
+  --tile-fg: var(--tile-navy-fg);
+  --tile-muted: var(--tile-navy-fg-muted);
+  --tile-bg-hover: var(--tile-deep-bg);
+  --tile-fg-hover: var(--tile-deep-fg);
+  --tile-muted-hover: var(--tile-deep-fg-muted);
+  position: relative;
+  background-color: var(--tile-bg);
+  color: var(--tile-fg);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms var(--ease-reveal);
 }
 
-/* Rotate animation */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.tile[data-tone="deep"] {
+  --tile-bg: var(--tile-deep-bg);
+  --tile-fg: var(--tile-deep-fg);
+  --tile-muted: var(--tile-deep-fg-muted);
+  --tile-bg-hover: var(--tile-teal-bg);
+  --tile-fg-hover: var(--tile-teal-fg);
+  --tile-muted-hover: var(--tile-teal-fg-muted);
 }
 
-/* Theme toggle animation */
-@keyframes theme-toggle {
-  0% {
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    transform: scale(0.8) rotate(180deg);
-  }
-  100% {
-    transform: scale(1) rotate(360deg);
-  }
+.tile[data-tone="teal"] {
+  --tile-bg: var(--tile-teal-bg);
+  --tile-fg: var(--tile-teal-fg);
+  --tile-muted: var(--tile-teal-fg-muted);
+  --tile-bg-hover: var(--tile-cyan-bg);
+  --tile-fg-hover: var(--tile-cyan-fg);
+  --tile-muted-hover: var(--tile-cyan-fg-muted);
 }
 
-/* Hero background zoom effect */
-@keyframes hero-zoom {
-  0% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1.15);
-  }
+.tile[data-tone="cyan"] {
+  --tile-bg: var(--tile-cyan-bg);
+  --tile-fg: var(--tile-cyan-fg);
+  --tile-muted: var(--tile-cyan-fg-muted);
+  --tile-bg-hover: var(--tile-bright-bg);
+  --tile-fg-hover: var(--tile-bright-fg);
+  --tile-muted-hover: var(--tile-bright-fg);
 }
 
-.animate-hero-zoom {
-  animation: hero-zoom 20s ease-out forwards;
-}
-
-/* Ken Burns effect for slideshow */
-@keyframes ken-burns {
-  0% {
-    transform: scale(1) translate(0, 0);
-  }
-  100% {
-    transform: scale(1.1) translate(-1%, -1%);
-  }
-}
-
-@keyframes ken-burns-reverse {
-  0% {
-    transform: scale(1.1) translate(-1%, -1%);
-  }
-  100% {
-    transform: scale(1) translate(0, 0);
-  }
-}
-
-/* Slideshow slide animations */
-@keyframes slide-in-right {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-left {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes zoom-in {
-  0% {
-    transform: scale(1.2);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-scale {
-  0% {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* ============================================
-   Animation Utility Classes
-   ============================================ */
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 2s;
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s ease-in-out infinite;
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.8s ease-out forwards;
-  opacity: 0;
-}
-
-.animate-fade-in-down {
-  animation: fade-in-down 0.8s ease-out forwards;
-  opacity: 0;
-}
-
-.animate-scroll-down {
-  animation: scroll-down 1.5s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background-size: 200% auto;
-  animation: shimmer 3s linear infinite;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
-
-.animate-theme-toggle {
-  animation: theme-toggle 0.5s ease-in-out;
-}
-
-/* Slideshow animations */
-.animate-slideshow-ken-burns {
-  animation: ken-burns 8s ease-out forwards;
-}
-
-.animate-slideshow-ken-burns-reverse {
-  animation: ken-burns-reverse 8s ease-out forwards;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.8s ease-out forwards;
-}
-
-.animate-slide-in-left {
-  animation: slide-in-left 0.8s ease-out forwards;
-}
-
-.animate-zoom-in {
-  animation: zoom-in 0.8s ease-out forwards;
-}
-
-.animate-fade-scale {
-  animation: fade-scale 0.6s ease-out forwards;
-}
-
-/* Animation delays */
-.animation-delay-100 {
-  animation-delay: 100ms;
-}
-
-.animation-delay-200 {
-  animation-delay: 200ms;
-}
-
-.animation-delay-300 {
-  animation-delay: 300ms;
-}
-
-.animation-delay-400 {
-  animation-delay: 400ms;
-}
-
-.animation-delay-500 {
-  animation-delay: 500ms;
-}
-
-.delay-300 {
-  animation-delay: 300ms;
-}
-
-.delay-500 {
-  animation-delay: 500ms;
-}
-
-.delay-700 {
-  animation-delay: 700ms;
-}
-
-/* ============================================
-   Scroll-Triggered Animations
-   ============================================ */
-
-/* Reveal animations - transform only. Opacity is driven separately (via the
-   .is-visible declared state) so revealed content can never be stranded
-   invisible if an animation is interrupted or never advances. */
-@keyframes reveal-up {
-  from { transform: translateY(60px); }
-  to { transform: translateY(0); }
-}
-
-@keyframes reveal-down {
-  from { transform: translateY(-60px); }
-  to { transform: translateY(0); }
-}
-
-@keyframes reveal-left {
-  from { transform: translateX(-60px); }
-  to { transform: translateX(0); }
-}
-
-@keyframes reveal-right {
-  from { transform: translateX(60px); }
-  to { transform: translateX(0); }
-}
-
-@keyframes reveal-scale {
-  from { transform: scale(0.8); }
-  to { transform: scale(1); }
-}
-
-@keyframes reveal-rotate {
-  from { transform: rotate(-10deg) scale(0.9); }
-  to { transform: rotate(0) scale(1); }
-}
-
-/* Scroll animation classes.
-   Opacity is a declared property (0 hidden -> 1 revealed) with a transition,
-   so the resting revealed state is a real opacity:1 that cannot be left
-   stranded by a frozen/interrupted keyframe animation. The keyframes only
-   handle the entrance transform (slide/scale). */
-.scroll-animate {
-  opacity: 0;
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.scroll-animate.is-visible {
-  opacity: 1;
-  animation-fill-mode: forwards;
-}
-
-.scroll-animate.reveal-up.is-visible {
-  animation: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.scroll-animate.reveal-down.is-visible {
-  animation: reveal-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.scroll-animate.reveal-left.is-visible {
-  animation: reveal-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.scroll-animate.reveal-right.is-visible {
-  animation: reveal-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.scroll-animate.reveal-scale.is-visible {
-  animation: reveal-scale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.scroll-animate.reveal-rotate.is-visible {
-  animation: reveal-rotate 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Stagger delays for scroll animations */
-.scroll-delay-100.is-visible { animation-delay: 100ms; }
-.scroll-delay-200.is-visible { animation-delay: 200ms; }
-.scroll-delay-300.is-visible { animation-delay: 300ms; }
-.scroll-delay-400.is-visible { animation-delay: 400ms; }
-.scroll-delay-500.is-visible { animation-delay: 500ms; }
-.scroll-delay-600.is-visible { animation-delay: 600ms; }
-
-/* ============================================
-   Theme-Aware Utility Classes
-   ============================================ */
-
-/* Text gradients - navy → electric blue (brand emphasis) */
-.text-gradient-primary {
-  background: linear-gradient(to right, var(--color-primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-secondary {
-  background: linear-gradient(to right, var(--accent), var(--color-accent-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Accent headline gradient - electric blue → cyan.
-   Uses --cyan-strong (deep cyan on light, bright cyan on dark) so the
-   fade stays AA-legible as clipped heading text in both themes. */
-.text-gradient-accent {
-  background: linear-gradient(to right, var(--accent), var(--cyan-strong));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
-
-/* ============================================
-   Enhanced Glassmorphism System
-   Modern frosted glass effects with depth
-   ============================================ */
-
-/* Base glass effect */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    0 4px 24px -1px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Glass card with enhanced depth */
-.glass-card {
-  background: var(--surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--border);
-  box-shadow:
-    0 4px 24px -1px rgba(0, 0, 0, 0.08),
-    0 2px 8px -1px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-  box-shadow:
-    0 8px 32px -1px rgba(0, 0, 0, 0.12),
-    0 4px 16px -1px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+.tile:is(:hover, :focus-within) {
+  background-color: var(--tile-bg-hover);
+  color: var(--tile-fg-hover);
   transform: translateY(-2px);
 }
 
-/* Premium glass variant - more blur, subtle tint */
-.glass-premium {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+.tile .tile-muted {
+  color: var(--tile-muted);
+  transition: color 180ms ease;
 }
 
-.dark .glass-premium {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+.tile:is(:hover, :focus-within) .tile-muted {
+  color: var(--tile-muted-hover);
 }
 
-/* Subtle glass - lighter effect for text backgrounds */
-.glass-subtle {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+/* "Illumination": a tile reached through an in-page link (#service-slug) lights up. */
+.tile:target {
+  outline: 2px solid var(--brand-cyan-bright);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--brand-cyan-bright) 20%, transparent);
 }
 
-.dark .glass-subtle {
-  background: rgba(23, 37, 56, 0.6);
-  border: 1px solid rgba(82, 103, 132, 0.3);
-}
-
-/* Frosted glass with gradient border */
-.glass-gradient-border {
+/* Thin cyan rule across the top of a card that grows on hover or focus. */
+.rule-grow {
   position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: inherit;
 }
 
-.glass-gradient-border::before {
-  content: '';
+.rule-grow::before {
+  content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.45),
-    rgba(6, 182, 212, 0.35),
-    rgba(37, 99, 235, 0.25)
-  );
-  /* Gradient border mask technique */
-  -webkit-mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
-  mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--accent-fill);
+  transform: scaleX(0.28);
+  transform-origin: left center;
+  transition: transform 260ms var(--ease-reveal);
 }
 
-/* Theme-aware surfaces */
-.surface {
-  background: var(--surface);
-  border: 1px solid var(--border);
+.rule-grow:is(:hover, :focus-within)::before {
+  transform: scaleX(1);
 }
 
-.surface-elevated {
-  background: var(--surface-elevated);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 20px var(--shadow-color);
+/* ==========================================================================
+   6. Motion - the "illumination" principle (avi = light)
+   Things move from dim to lit. Transform and opacity only, with one exception:
+   the stroke of an icon ring "opening". Reveals are gated behind the .js class
+   set by the inline theme script, so no-JS and crawler views see all content.
+   ========================================================================== */
+
+/* Scroll reveals (once per element: useScrollAnimation keeps triggerOnce). */
+.js .scroll-animate {
+  opacity: 0;
+  transform: translate3d(var(--reveal-x, 0px), var(--reveal-y, 28px), 0) scale(var(--reveal-scale, 1));
+  transition:
+    opacity 700ms var(--ease-reveal),
+    transform 800ms var(--ease-reveal);
+  transition-delay: var(--reveal-delay, 0ms);
 }
 
-/* ============================================
-   Interactive States
-   ============================================ */
-
-/* Focus visible styles for accessibility */
-.focus-ring {
-  outline: none;
+.js .scroll-animate[data-reveal="left"] {
+  --reveal-x: -40px;
+  --reveal-y: 0px;
 }
 
-.focus-ring:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.js .scroll-animate[data-reveal="right"] {
+  --reveal-x: 40px;
+  --reveal-y: 0px;
 }
 
-/* Approved brand gradient (135deg deep navy → navy) */
-.bg-brand-gradient {
-  background-image: var(--gradient-brand);
+.js .scroll-animate[data-reveal="scale"] {
+  --reveal-y: 0px;
+  --reveal-scale: 0.96;
 }
 
-/* Hover lift effect */
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.js .scroll-animate.is-visible {
+  opacity: 1;
+  transform: none;
 }
 
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px var(--shadow-colored);
-}
+@keyframes rise-in {
+  from {
+    transform: translateY(108%);
+  }
 
-/* ============================================
-   Responsive Adjustments (Mobile-First)
-   ============================================ */
-
-/* Mobile scroll padding for fixed header */
-html {
-  scroll-padding-top: 80px;
-}
-
-/* Tablet and up */
-@media (min-width: 768px) {
-  html {
-    scroll-padding-top: 100px;
+  to {
+    transform: translateY(0);
   }
 }
 
-/* Reduced motion preference */
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes photo-in {
+  from {
+    opacity: 0;
+    transform: translateX(5%) scale(1.06);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes wave-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+
+  to {
+    transform: translate3d(-2.5%, 1.5%, 0) scale(1.08);
+  }
+}
+
+@keyframes ring-open {
+  from {
+    stroke-dashoffset: 28;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Hero load sequence: nav fades, headline lines rise through a mask, the rest fades up. */
+.hero-line {
+  display: block;
+  overflow: hidden;
+  /* room for descenders so the mask never clips them */
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.js .hero-line > span {
+  display: inline-block;
+  animation: rise-in 900ms var(--ease-reveal) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 150ms);
+}
+
+.js .hero-fade {
+  animation: fade-rise 800ms var(--ease-reveal) both;
+  animation-delay: calc(var(--i, 0) * 80ms + 450ms);
+}
+
+.js .hero-photo {
+  animation: photo-in 1100ms var(--ease-reveal) both;
+  animation-delay: 300ms;
+}
+
+.js .hero-nav {
+  animation: fade-in 700ms ease both;
+}
+
+/* The single ambient animation: a very slow, transform-only drift of the wave artwork. */
+.wave-drift {
+  animation: wave-drift 40s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* The ring of an icon "opens" when its tile is hovered or focused. */
+.tile:is(:hover, :focus-within) .ring-path {
+  stroke-dasharray: 28;
+  animation: ring-open 600ms var(--ease-reveal) both;
+}
+
+/* Smooth in-page scrolling is opt-in: people who ask for less motion get instant jumps. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .wave-drift {
+    animation: none;
+  }
+
+  .js .scroll-animate,
+  .js .hero-line > span {
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* ============================================
-   Theme Transition
-   ============================================ */
-
-/* Smooth transition for theme changes */
+/* Applied for a moment when the theme is toggled so colours ease rather than jump. */
 .theme-transition,
 .theme-transition *,
 .theme-transition *::before,
 .theme-transition *::after {
-  transition: background-color 0.3s ease,
-              border-color 0.3s ease,
-              color 0.3s ease,
-              fill 0.3s ease,
-              stroke 0.3s ease,
-              box-shadow 0.3s ease !important;
+  transition:
+    background-color 250ms ease,
+    border-color 250ms ease,
+    color 250ms ease,
+    fill 250ms ease,
+    stroke 250ms ease !important;
 }

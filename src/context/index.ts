@@ -6,4 +6,4 @@
  * @company Openavii Technologies
  */
 
-export { ThemeProvider, useTheme } from './ThemeContext';
+export { ThemeProvider, useTheme, type Theme, type ResolvedTheme } from './ThemeContext';
