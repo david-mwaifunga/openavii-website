@@ -1,7 +1,11 @@
 /**
- * Inquiry Modal Component
- * A modal for submitting inquiries via email.
- * Supports packages, services, and custom project inquiries.
+ * InquiryModal
+ * The enquiry form. The site has no backend and stores nothing: sending opens
+ * the visitor's own mail app with the details pre-filled, addressed to the
+ * company mailbox (lib/mailto). Works for a package, a service or a custom
+ * project. Name and email are required, validated here with clear messages
+ * (never colour alone: the invalid field gets a heavier border and a message).
+ * Field ids come from useId, so several forms can never clash.
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
@@ -9,263 +13,205 @@
 
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { Modal } from './Modal';
+import { useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { inquiryCopy } from '@/content/contact';
+import {
+  buildMailto,
+  validateInquiry,
+  type InquiryDetails,
+  type InquiryErrors,
+  type InquiryType,
+} from '@/lib/mailto';
+import { cn } from '@/lib/cn';
 import { Button } from './Button';
+import { Modal } from './Modal';
 
 interface InquiryModalProps {
-  /** Whether the modal is open */
   isOpen: boolean;
-  /** Callback when modal should close */
   onClose: () => void;
-  /** Type of inquiry - determines banner style and email content */
-  inquiryType?: 'package' | 'service' | 'custom';
-  /** Service/Package name */
-  serviceName: string;
-  /** Price range (optional for custom inquiries) */
+  type: InquiryType;
+  /** Package or service name shown in the banner and used in the e-mail. */
+  subjectName?: string;
+  /** Indicative price range, for packages. */
   priceRange?: string;
-  /** Modal title override */
-  title?: string;
+  /** How to open the mail app. Defaults to setting `window.location.href`; injectable for tests. */
+  navigate?: (url: string) => void;
 }
 
-/** Legacy props for backwards compatibility */
-interface LegacyInquiryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  packageName: string;
-  priceRange: string;
+const defaultNavigate = (url: string) => {
+  window.location.href = url;
+};
+
+const EMPTY: InquiryDetails = { name: '', email: '', phone: '', company: '', message: '' };
+
+const FIELD =
+  'w-full rounded-tile border border-fg/60 bg-page px-4 py-3 text-body text-fg aria-[invalid=true]:border-2 aria-[invalid=true]:border-fg';
+
+export function InquiryModal({
+  isOpen,
+  onClose,
+  type,
+  subjectName,
+  priceRange,
+  navigate = defaultNavigate,
+}: InquiryModalProps) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={inquiryCopy.titles[type]}>
+      {/* The form lives inside the modal, so its state resets every time the dialog opens. */}
+      <InquiryForm
+        type={type}
+        subjectName={subjectName}
+        priceRange={priceRange}
+        onClose={onClose}
+        navigate={navigate}
+      />
+    </Modal>
+  );
 }
 
-/** Contact email for inquiries */
-const CONTACT_EMAIL = 'bmanagerapplication@gmail.com';
+function InquiryForm({
+  type,
+  subjectName,
+  priceRange,
+  onClose,
+  navigate,
+}: Required<Pick<InquiryModalProps, 'type' | 'onClose' | 'navigate'>> &
+  Pick<InquiryModalProps, 'subjectName' | 'priceRange'>) {
+  const uid = useId();
+  const [values, setValues] = useState<InquiryDetails>(EMPTY);
+  const [errors, setErrors] = useState<InquiryErrors>({});
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
-/**
- * Modal form for inquiries.
- * Opens email client with pre-filled subject and body.
- */
-export function InquiryModal(props: InquiryModalProps | LegacyInquiryModalProps) {
-  // Handle legacy props (packageName -> serviceName)
-  const isOpen = props.isOpen;
-  const onClose = props.onClose;
-  const serviceName = 'serviceName' in props ? props.serviceName : props.packageName;
-  const priceRange = 'priceRange' in props ? props.priceRange : undefined;
-  const inquiryType = 'inquiryType' in props ? props.inquiryType : 'package';
-  const title = 'title' in props ? props.title : (inquiryType === 'custom' ? 'Discuss Your Project' : 'Request a Quote');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    message: '',
-  });
+  const change =
+    (field: keyof InquiryDetails) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setValues((current) => ({ ...current, [field]: event.target.value }));
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    // Construct email subject based on inquiry type
-    const subjectMap = {
-      package: `Inquiry: ${serviceName} Package`,
-      service: `Inquiry: ${serviceName} Service`,
-      custom: 'Custom Project Inquiry',
-    };
-    const subject = encodeURIComponent(subjectMap[inquiryType || 'package']);
-
-    // Construct intro line based on inquiry type
-    const introMap = {
-      package: `I am interested in the ${serviceName} package${priceRange ? ` (${priceRange})` : ''}.`,
-      service: `I am interested in the ${serviceName} service${priceRange ? ` (${priceRange})` : ''}.`,
-      custom: `I am interested in discussing a custom project.`,
-    };
-
-    // Construct email body with all details
-    const body = encodeURIComponent(
-`Hello Openavii Technologies,
-
-${introMap[inquiryType || 'package']}
-
---- Client Information ---
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone || 'Not provided'}
-Business: ${formData.company || 'Not provided'}
-
---- Additional Message ---
-${formData.message || 'No additional message.'}
-
----
-Looking forward to hearing from you.
-
-Best regards,
-${formData.name}`
-    );
-
-    // Open email client
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-
-    // Reset form and close modal
-    setFormData({ name: '', email: '', phone: '', company: '', message: '' });
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const found = validateInquiry(values);
+    setErrors(found);
+    if (found.name) return nameRef.current?.focus();
+    if (found.email) return emailRef.current?.focus();
+    navigate(buildMailto({ type, subjectName, priceRange, details: values }));
     onClose();
   };
 
-  // Banner label based on inquiry type
-  const bannerLabelMap = {
-    package: 'Selected Package',
-    service: 'Selected Service',
-    custom: 'Inquiry Type',
-  };
+  const f = inquiryCopy.fields;
+  const label = (text: string, required: boolean) => (
+    <>
+      {text}
+      {required && <span aria-hidden="true"> *</span>}
+    </>
+  );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} size="lg">
-      <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4">
-        {/* Service/Package Info Banner */}
-        <div className="bg-navy-tint rounded-xl p-4 border border-line">
-          <p className="text-sm text-fg-muted">{bannerLabelMap[inquiryType || 'package']}</p>
-          <p className="text-lg font-bold text-heading">{serviceName}</p>
-          {priceRange && (
-            <p className="text-sm font-semibold text-accent">{priceRange}</p>
+    <form onSubmit={submit} noValidate className="space-y-5 p-6">
+      <div className="rounded-tile border border-line bg-alt p-4">
+        <p className="text-small text-muted">{inquiryCopy.bannerLabels[type]}</p>
+        <p className="text-h4">{subjectName ?? inquiryCopy.customBannerValue}</p>
+        {priceRange && <p className="text-small font-bold text-accent-text">{priceRange}</p>}
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor={`${uid}-name`} className="mb-1.5 block text-small font-bold">
+            {label(f.name.label, f.name.required)}
+          </label>
+          <input
+            ref={nameRef}
+            id={`${uid}-name`}
+            data-autofocus=""
+            type="text"
+            required
+            autoComplete={f.name.autoComplete}
+            value={values.name}
+            onChange={change('name')}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? `${uid}-name-error` : undefined}
+            className={FIELD}
+          />
+          {errors.name && (
+            <p id={`${uid}-name-error`} className="mt-1.5 text-small font-bold">
+              {errors.name}
+            </p>
           )}
         </div>
-
-        {/* Form Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-fg mb-1">
-              Full Name <span className="text-error">*</span>
-            </label>
-            <input
-              type="text"
-              id="name"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="
-                w-full px-4 py-2.5 rounded-lg
-                bg-surface-muted
-                border border-line
-                text-fg
-                placeholder-fg-subtle
-                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
-                transition-all duration-200
-              "
-              placeholder="John Doe"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-fg mb-1">
-              Email Address <span className="text-error">*</span>
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="
-                w-full px-4 py-2.5 rounded-lg
-                bg-surface-muted
-                border border-line
-                text-fg
-                placeholder-fg-subtle
-                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
-                transition-all duration-200
-              "
-              placeholder="john@example.com"
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-fg mb-1">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="
-                w-full px-4 py-2.5 rounded-lg
-                bg-surface-muted
-                border border-line
-                text-fg
-                placeholder-fg-subtle
-                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
-                transition-all duration-200
-              "
-              placeholder="+260 XXX XXX XXX"
-            />
-          </div>
-
-          {/* Company */}
-          <div>
-            <label htmlFor="company" className="block text-sm font-medium text-fg mb-1">
-              Business Name
-            </label>
-            <input
-              type="text"
-              id="company"
-              value={formData.company}
-              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              className="
-                w-full px-4 py-2.5 rounded-lg
-                bg-surface-muted
-                border border-line
-                text-fg
-                placeholder-fg-subtle
-                focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
-                transition-all duration-200
-              "
-              placeholder="Your Company Ltd"
-            />
-          </div>
-        </div>
-
-        {/* Message */}
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-fg mb-1">
-            Additional Details
+          <label htmlFor={`${uid}-email`} className="mb-1.5 block text-small font-bold">
+            {label(f.email.label, f.email.required)}
           </label>
-          <textarea
-            id="message"
-            rows={3}
-            value={formData.message}
-            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            className="
-              w-full px-4 py-2.5 rounded-lg
-              bg-surface-muted
-              border border-line
-              text-fg
-              placeholder-fg-subtle
-              focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent
-              transition-all duration-200
-              resize-none
-            "
-            placeholder="Tell us about your project requirements, timeline, or any questions you have..."
+          <input
+            ref={emailRef}
+            id={`${uid}-email`}
+            type="email"
+            required
+            autoComplete={f.email.autoComplete}
+            value={values.email}
+            onChange={change('email')}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? `${uid}-email-error` : undefined}
+            className={FIELD}
+          />
+          {errors.email && (
+            <p id={`${uid}-email-error`} className="mt-1.5 text-small font-bold">
+              {errors.email}
+            </p>
+          )}
+        </div>
+        <div>
+          <label htmlFor={`${uid}-phone`} className="mb-1.5 block text-small font-bold">
+            {label(f.phone.label, f.phone.required)}
+          </label>
+          <input
+            id={`${uid}-phone`}
+            type="tel"
+            autoComplete={f.phone.autoComplete}
+            value={values.phone}
+            onChange={change('phone')}
+            className={FIELD}
           />
         </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button type="submit" fullWidth className="sm:flex-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            Send Inquiry
-          </Button>
-          <Button type="button" variant="outline" onClick={onClose} className="sm:w-auto">
-            Cancel
-          </Button>
+        <div>
+          <label htmlFor={`${uid}-company`} className="mb-1.5 block text-small font-bold">
+            {label(f.company.label, f.company.required)}
+          </label>
+          <input
+            id={`${uid}-company`}
+            type="text"
+            autoComplete={f.company.autoComplete}
+            value={values.company}
+            onChange={change('company')}
+            className={FIELD}
+          />
         </div>
+      </div>
 
-        {/* Note */}
-        <p className="text-xs text-fg-subtle text-center">
-          This will open your email client with the inquiry details pre-filled.
-        </p>
-      </form>
-    </Modal>
+      <div>
+        <label htmlFor={`${uid}-message`} className="mb-1.5 block text-small font-bold">
+          {label(f.message.label, f.message.required)}
+        </label>
+        <textarea
+          id={`${uid}-message`}
+          rows={4}
+          value={values.message}
+          onChange={change('message')}
+          className={cn(FIELD, 'resize-y')}
+        />
+      </div>
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <Button variant="secondary" onClick={onClose}>
+          {inquiryCopy.cancel}
+        </Button>
+        <Button type="submit" iconAfter="Mail">
+          {inquiryCopy.submit}
+        </Button>
+      </div>
+
+      <p className="text-small text-muted">{inquiryCopy.note}</p>
+    </form>
   );
 }
 

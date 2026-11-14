@@ -1,8 +1,16 @@
 /**
- * Header Component
- * A sophisticated navigation header with glassmorphism effect.
- * Features smooth scroll navigation, theme toggle, and responsive logo.
- * Mobile-first design with theme-responsive styling.
+ * Header
+ * Fixed navigation. Over the hero it is transparent and scoped to the dark
+ * brand surface (white logo, light text); once the page scrolls it becomes a
+ * solid bar that follows the theme. From the xl breakpoint it shows the
+ * navigation, the theme toggle and "Get a Quote"; below that, a menu button
+ * opens a full-screen sheet with large type. The sheet is a proper modal
+ * dialog (aria-expanded / aria-controls on its button, focus trapped and
+ * returned, Escape closes, the page behind it inert).
+ *
+ * Navigation links are plain in-page anchors: they work without JavaScript,
+ * update the URL, and smooth-scroll only when the visitor has not asked for
+ * reduced motion (CSS).
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
@@ -10,236 +18,134 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Button, ThemeToggle } from '@/components/ui';
-import { useTheme } from '@/context';
-import { useMounted } from '@/hooks';
+import { useCallback, useId, useRef, useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { Logo } from '@/components/ui/Logo';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { site } from '@/content/site';
+import { useInquiry } from '@/context/InquiryContext';
+import { useDialogBehaviour } from '@/hooks/useDialogBehaviour';
+import { useScrolled } from '@/hooks/useScrolled';
+import { cn } from '@/lib/cn';
 
-/** Navigation link interface */
-interface NavLink {
-  label: string;
-  href: string;
-}
-
-/** Available navigation links */
-const navLinks: NavLink[] = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Packages', href: '#packages' },
-  { label: 'Add-ons', href: '#addons' },
-  { label: 'Contact', href: '#contact' },
-];
-
-/**
- * Main navigation header with scroll-aware styling.
- * Transforms from transparent to glassmorphism on scroll.
- * Includes theme toggle and responsive logo that adapts to current theme.
- */
 export function Header() {
-  // Track scroll position for header styling
-  const [isScrolled, setIsScrolled] = useState(false);
-  // Mobile menu open state
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Mounted state for hydration
-  const mounted = useMounted();
-  // Theme context
-  const { resolvedTheme } = useTheme();
+  const scrolled = useScrolled(24);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const sheetId = useId();
+  const { openInquiry } = useInquiry();
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
-  // Listen for scroll events to update header style
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+  useDialogBehaviour({ isOpen: menuOpen, onClose: closeMenu, containerRef: sheetRef });
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Smooth scroll to section
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMobileMenuOpen(false);
+  const quote = () => {
+    closeMenu();
+    openInquiry({ type: 'custom' });
   };
-
-  // Determine which logo to show based on theme
-  const logoSrc = mounted && resolvedTheme === 'dark'
-    ? '/Openavii-Light.png'
-    : '/Openavii-Dark.png';
 
   return (
     <header
-      className={`
-        fixed top-0 left-0 right-0 z-50
-        transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-        ${isScrolled
-          ? `bg-surface/80
-             backdrop-blur-2xl backdrop-saturate-[180%]
-             border-b border-line
-             shadow-[0_4px_30px_-8px_rgba(22,34,53,0.10)]
-             dark:shadow-[0_4px_30px_-8px_rgba(0,0,0,0.4)]
-             py-3 md:py-4`
-          : 'bg-transparent py-4 md:py-6'
-        }
-      `}
+      data-surface={scrolled ? undefined : 'dark'}
+      className={cn(
+        'hero-nav fixed inset-x-0 top-0 z-40 transition-[background-color,border-color] duration-200',
+        scrolled ? 'border-b border-line bg-page' : 'border-b border-transparent bg-transparent',
+      )}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <a
-            href="#home"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection('#home');
-            }}
-            className="group flex items-center gap-2"
-          >
-            {/* Logo Image - switches based on theme */}
-            {mounted ? (
-              <Image
-                src={logoSrc}
-                alt="Openavii Technologies"
-                width={280}
-                height={80}
-                className="h-10 w-auto sm:h-12 md:h-14 lg:h-16"
-                priority
-              />
-            ) : (
-              /* Skeleton placeholder during SSR */
-              <div className="h-10 w-36 sm:h-12 sm:w-44 md:h-14 md:w-52 lg:h-16 lg:w-60 bg-surface-tint rounded animate-pulse" />
-            )}
-          </a>
+      <div className="wrap flex h-[var(--header-h)] items-center justify-between gap-6">
+        <a href="#home" aria-label={`${site.name}, home`} className="shrink-0 rounded-tile">
+          <Logo variant="full" className="w-36 sm:w-44" />
+        </a>
 
-          {/* Desktop Navigation */}
-          <ul className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <li key={link.href}>
+        <nav aria-label="Primary" className="hidden items-center xl:flex">
+          <ul className="flex items-center gap-1">
+            {site.nav.map((item) => (
+              <li key={item.href}>
                 <a
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(link.href);
-                  }}
-                  className="
-                    relative px-4 py-2 text-sm font-medium
-                    text-heading/80
-                    hover:text-accent
-                    transition-colors duration-300
-                    after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
-                    after:w-0 after:h-0.5 after:bg-accent
-                    after:transition-all after:duration-300 hover:after:w-full
-                  "
+                  href={item.href}
+                  className="inline-flex min-h-11 items-center rounded-pill px-4 text-small font-bold text-fg transition-colors hover:text-accent-text"
                 >
-                  {link.label}
+                  {item.label}
                 </a>
               </li>
             ))}
           </ul>
-
-          {/* Right side actions */}
-          <div className="flex items-center gap-2 md:gap-3">
-            {/* Theme Toggle */}
-            <ThemeToggle />
-
-            {/* CTA Button - hidden on mobile */}
-            <div className="hidden md:block">
-              <Button
-                size="sm"
-                onClick={() => scrollToSection('#contact')}
-              >
-                Get Started
-              </Button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="
-                lg:hidden relative w-10 h-10 flex items-center justify-center
-                rounded-xl
-                bg-surface-muted
-                border border-line
-                transition-colors duration-300
-              "
-              aria-label="Toggle menu"
-            >
-              <div className="relative w-5 h-4 flex flex-col justify-between">
-                <span
-                  className={`
-                    block h-0.5 rounded-full transition-all duration-300
-                    bg-heading
-                    ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}
-                  `}
-                />
-                <span
-                  className={`
-                    block h-0.5 rounded-full transition-all duration-300
-                    bg-heading
-                    ${isMobileMenuOpen ? 'opacity-0 scale-0' : ''}
-                  `}
-                />
-                <span
-                  className={`
-                    block h-0.5 rounded-full transition-all duration-300
-                    bg-heading
-                    ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}
-                  `}
-                />
-              </div>
-            </button>
-          </div>
         </nav>
 
-        {/* Mobile Menu */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button size="sm" className="hidden sm:inline-flex" onClick={quote}>
+            {site.navCta}
+          </Button>
+          <button
+            type="button"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+            aria-controls={sheetId}
+            onClick={() => setMenuOpen(true)}
+            className="grid size-11 shrink-0 place-items-center rounded-pill border border-line text-fg transition-colors hover:bg-alt xl:hidden"
+          >
+            <Icon name="Menu" />
+          </button>
+        </div>
+      </div>
+
+      {menuOpen && (
         <div
-          className={`
-            lg:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-            ${isMobileMenuOpen ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}
-          `}
+          ref={sheetRef}
+          id={sheetId}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          tabIndex={-1}
+          data-surface="dark"
+          className="fixed inset-0 z-50 flex flex-col overflow-y-auto"
         >
-          <div className="
-            bg-surface/90
-            backdrop-blur-2xl backdrop-saturate-[180%]
-            rounded-2xl
-            border border-line
-            shadow-[0_8px_32px_-8px_rgba(22,34,53,0.12)]
-            dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.45)]
-            p-4
-          ">
-            <ul className="flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <li key={link.href}>
+          <div className="wrap flex h-[var(--header-h)] shrink-0 items-center justify-between">
+            <Logo variant="full" tone="white" className="w-36 sm:w-44" />
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={closeMenu}
+              className="grid size-11 place-items-center rounded-pill border border-line text-fg transition-colors hover:bg-alt"
+            >
+              <Icon name="X" />
+            </button>
+          </div>
+
+          <nav aria-label="Sections" className="wrap flex-1 py-8">
+            <ul>
+              {site.nav.map((item) => (
+                <li key={item.href} className="border-b border-line">
                   <a
-                    href={link.href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      scrollToSection(link.href);
-                    }}
-                    className="
-                      block px-4 py-3 rounded-xl
-                      text-fg-muted
-                      hover:text-heading
-                      bg-surface-muted
-                      hover:bg-navy-tint
-                      transition-all duration-300
-                    "
+                    href={item.href}
+                    onClick={closeMenu}
+                    className="flex min-h-11 items-center justify-between py-4 text-h2 text-heading transition-colors hover:text-accent-text"
                   >
-                    {link.label}
+                    {item.label}
+                    <Icon name="ArrowUpRight" size={32} />
                   </a>
                 </li>
               ))}
-              <li className="mt-2">
-                <Button fullWidth onClick={() => scrollToSection('#contact')}>
-                  Get Started
-                </Button>
-              </li>
             </ul>
+          </nav>
+
+          <div className="wrap space-y-5 pb-10">
+            <Button size="lg" className="w-full" onClick={quote}>
+              {site.navCta}
+            </Button>
+            <p className="text-small text-muted">
+              <a href={`tel:${site.contact.phones[0].e164}`} className="font-bold text-fg">
+                {site.contact.phones[0].display}
+              </a>
+              {' · '}
+              <a href={`mailto:${site.contact.email}`} className="font-bold text-fg">
+                {site.contact.email}
+              </a>
+            </p>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

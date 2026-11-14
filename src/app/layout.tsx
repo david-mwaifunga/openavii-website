@@ -9,7 +9,7 @@
 
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { ThemeProvider } from "@/context";
+import { InquiryProvider, ThemeProvider } from "@/context";
 import { themeScript } from "@/lib/themeScript";
 import "./globals.css";
 
@@ -61,7 +61,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <InquiryProvider>{children}</InquiryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,7 +1,9 @@
 /**
- * Modal Component
- * A reusable modal dialog component with animations and accessibility features.
- * Theme-responsive with mobile-first design.
+ * Modal
+ * An accessible dialog: role="dialog" with aria-modal, labelled by its title,
+ * portalled to <body>. Focus moves in and is trapped, Escape and the backdrop
+ * close it, the rest of the page is `inert` and does not scroll, and focus
+ * returns to the control that opened it (all in useDialogBehaviour).
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
@@ -9,106 +11,66 @@
 
 'use client';
 
-import { useEffect, useCallback, ReactNode } from 'react';
+import { useId, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { useDialogBehaviour } from '@/hooks/useDialogBehaviour';
+import { cn } from '@/lib/cn';
+import { Icon } from './Icon';
 
 interface ModalProps {
-  /** Whether the modal is open */
   isOpen: boolean;
-  /** Callback when modal should close */
   onClose: () => void;
-  /** Modal content */
+  /** Visible title; also the dialog's accessible name. */
+  title: string;
   children: ReactNode;
-  /** Modal title */
-  title?: string;
-  /** Size variant */
   size?: 'sm' | 'md' | 'lg';
 }
 
-/**
- * Reusable modal dialog component with animations.
- * Supports keyboard navigation and click-outside-to-close.
- */
-export function Modal({ isOpen, onClose, children, title, size = 'md' }: ModalProps) {
-  // Handle escape key press
-  const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-    }
-  }, [onClose]);
+const SIZES = { sm: 'sm:max-w-sm', md: 'sm:max-w-md', lg: 'sm:max-w-xl' } as const;
 
-  // Add/remove escape key listener
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, handleEscape]);
+export function Modal({ isOpen, onClose, title, children, size = 'lg' }: ModalProps) {
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogBehaviour({ isOpen, onClose, containerRef: dialogRef });
 
   if (!isOpen) return null;
 
-  const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <div
-        className="absolute inset-0 bg-navy-dark/60 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
+        data-testid="modal-backdrop"
         aria-hidden="true"
+        onClick={onClose}
+        className="absolute inset-0 bg-depth/75"
       />
-
-      {/* Modal Container */}
       <div
-        className={`
-          relative w-full ${sizeClasses[size]}
-          bg-surface
-          rounded-2xl shadow-2xl
-          border border-line
-          animate-fade-in-up
-          max-h-[90vh] overflow-y-auto
-        `}
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
-      >
-        {/* Header */}
-        {title && (
-          <div className="flex items-center justify-between p-4 md:p-6 border-b border-line">
-            <h2 id="modal-title" className="text-lg md:text-xl font-bold text-heading">
-              {title}
-            </h2>
-            <button
-              onClick={onClose}
-              className="
-                w-8 h-8 rounded-lg
-                flex items-center justify-center
-                text-fg-subtle hover:text-fg
-                hover:bg-surface-tint
-                transition-colors duration-200
-              "
-              aria-label="Close modal"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className={cn(
+          'relative max-h-[92dvh] w-full overflow-y-auto rounded-t-tile border border-line bg-surface text-fg shadow-2xl sm:rounded-tile',
+          SIZES[size],
         )}
-
-        {/* Content */}
-        <div className={title ? '' : 'pt-4 md:pt-6'}>
-          {children}
+      >
+        <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-4">
+          <h2 id={titleId} className="text-h4">
+            {title}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="grid size-11 shrink-0 place-items-center rounded-pill text-fg transition-colors hover:bg-alt"
+          >
+            <Icon name="X" />
+          </button>
         </div>
+        {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

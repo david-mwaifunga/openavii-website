@@ -1,44 +1,25 @@
 /**
  * Home Page
- * Main landing page for Openavii Technologies website.
- * Assembles all section components into a cohesive, single-page experience.
+ * The single-page site: skip link, header, the sections (added in the next
+ * phase), and the footer. <ShapeDefs /> supplies the brand-shape clip paths
+ * used by framed photographs anywhere on the page.
  *
  * @author David Mwaifunga
  * @company Openavii Technologies
  */
 
-import { Header, Footer } from '@/components/layout';
-import { Hero, About, Showcase, Packages, Addons } from '@/components/sections';
+import { Footer, Header, SkipLink } from '@/components/layout';
+import { ShapeDefs } from '@/components/ui';
 
-/**
- * Home page component
- * Renders the complete single-page website with all sections
- */
 export default function Home() {
   return (
     <>
-      {/* Navigation Header - Fixed position */}
+      <SkipLink />
+      <ShapeDefs />
       <Header />
-
-      {/* Main Content */}
-      <main>
-        {/* Hero Section - Full viewport introduction */}
-        <Hero />
-
-        {/* About Section - Company story and values */}
-        <About />
-
-        {/* Showcase Section - Design capability & photo integration */}
-        <Showcase />
-
-        {/* Packages Section - Website & application development packages */}
-        <Packages />
-
-        {/* Add-ons Section - Optional services */}
-        <Addons />
+      <main id="main" tabIndex={-1} className="focus:outline-none">
+        {/* Sections are assembled here in page order. */}
       </main>
-
-      {/* Footer with contact CTA */}
       <Footer />
     </>
   );

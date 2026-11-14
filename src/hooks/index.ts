@@ -6,5 +6,7 @@
  * @company Openavii Technologies
  */
 
+export { useDialogBehaviour } from './useDialogBehaviour';
 export { useMounted } from './useMounted';
 export { useScrollAnimation } from './useScrollAnimation';
+export { useScrolled } from './useScrolled';

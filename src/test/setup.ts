@@ -22,7 +22,20 @@ expect.extend(axeMatchers);
 
 const hasDom = typeof window !== 'undefined';
 
+/**
+ * React reports invalid HTML nesting, missing keys, act() problems and
+ * hydration mismatches through console.error. A passing test must not
+ * hide them, so any unexpected console.error fails the test that caused it.
+ * A test that expects an error (e.g. a hook used outside its provider) says so
+ * with its own `vi.spyOn(console, 'error').mockImplementation(() => {})`.
+ */
+let consoleErrors: unknown[][] = [];
+
 beforeEach(() => {
+  consoleErrors = [];
+  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    consoleErrors.push(args);
+  });
   if (!hasDom) return;
   // Default environment: light scheme, motion allowed. Tests override via
   // installMatchMedia({ dark: true, reducedMotion: true }).
@@ -32,8 +45,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  if (hasDom) cleanup();
+  const unexpected = consoleErrors;
+  consoleErrors = [];
+  if (unexpected.length > 0) {
+    const first = unexpected[0].map((a) => (a instanceof Error ? a.message : String(a))).join(' ');
+    throw new Error(`Unexpected console.error during the test (${unexpected.length}): ${first.slice(0, 600)}`);
+  }
   if (!hasDom) return;
-  cleanup();
   document.documentElement.className = '';
   document.documentElement.removeAttribute('style');
   document.body.removeAttribute('style');
