@@ -25,7 +25,10 @@ export function Footer() {
       <div className="wrap">
         <div className="grid gap-14 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <Logo variant="extended" tone="white" width={300} clearSpace />
+            {/* The clear space is built into the logo box; pull the box out so the artwork itself lines up with the text. */}
+            <div className="-ml-[18px] -mt-[18px]">
+              <Logo variant="extended" tone="white" width={300} clearSpace />
+            </div>
             <p className="mt-4 max-w-xs text-lead font-light text-muted">{site.tagline}</p>
           </div>
 

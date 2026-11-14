@@ -371,6 +371,10 @@
   --tile-bg-hover: var(--tile-deep-bg);
   --tile-fg-hover: var(--tile-deep-fg);
   --tile-muted-hover: var(--tile-deep-fg-muted);
+  /* Focus inside a tile also applies its hover colours, so the focus ring takes the
+     hover text colour: white on navy, deep and teal, near-black on the cyan tiles.
+     (The bright-cyan surface focus colour would vanish on a cyan or teal tile.) */
+  --focus: var(--tile-fg-hover);
   position: relative;
   background-color: var(--tile-bg);
   color: var(--tile-fg);
@@ -413,6 +417,12 @@
   transform: translateY(-2px);
 }
 
+/* Headings take the tile's own text colour: the surface heading colour (white) would
+   fail contrast on the cyan tiles. */
+.tile :where(h1, h2, h3, h4, h5, h6) {
+  color: inherit;
+}
+
 .tile .tile-muted {
   color: var(--tile-muted);
   transition: color 180ms ease;
@@ -424,6 +434,22 @@
 
 /* "Illumination": a tile reached through an in-page link (#service-slug) lights up. */
 .tile:target {
+  outline: 2px solid var(--brand-cyan-bright);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--brand-cyan-bright) 20%, transparent);
+}
+
+/* A problem card that relates to several services lights all of them while it is
+   hovered or focused (pure CSS, progressive enhancement via :has). The first target
+   is also the card's link, which lights through :target when followed. */
+:root:has(.problem-card[data-targets~="automation"]:is(:hover, :focus-within)) #service-automation,
+:root:has(.problem-card[data-targets~="custom-software"]:is(:hover, :focus-within)) #service-custom-software,
+:root:has(.problem-card[data-targets~="maintenance-support"]:is(:hover, :focus-within)) #service-maintenance-support,
+:root:has(.problem-card[data-targets~="integration-apis"]:is(:hover, :focus-within)) #service-integration-apis,
+:root:has(.problem-card[data-targets~="dashboards"]:is(:hover, :focus-within)) #service-dashboards,
+:root:has(.problem-card[data-targets~="solution-architecture"]:is(:hover, :focus-within)) #service-solution-architecture,
+:root:has(.problem-card[data-targets~="database-design"]:is(:hover, :focus-within)) #service-database-design,
+:root:has(.problem-card[data-targets~="security-performance"]:is(:hover, :focus-within)) #service-security-performance {
   outline: 2px solid var(--brand-cyan-bright);
   outline-offset: 4px;
   box-shadow: 0 0 0 10px color-mix(in srgb, var(--brand-cyan-bright) 20%, transparent);
@@ -543,11 +569,11 @@
 
 @keyframes ring-open {
   from {
-    stroke-dashoffset: 28;
+    stroke-dashoffset: 100;
   }
 
   to {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: 8;
   }
 }
 
@@ -586,10 +612,48 @@
   will-change: transform;
 }
 
-/* The ring of an icon "opens" when its tile is hovered or focused. */
+/* The icon ring has the Mark's notch (a gap of 8 % of its length, pathLength is 100)
+   and draws itself open again when its tile is hovered or focused. */
+.ring-path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 8;
+}
+
 .tile:is(:hover, :focus-within) .ring-path {
-  stroke-dasharray: 28;
-  animation: ring-open 600ms var(--ease-reveal) both;
+  animation: ring-open 700ms var(--ease-reveal) both;
+}
+
+/* Process timeline: the line fills with light and each node lights in turn as the
+   section scrolls into view (the wrapper gains .is-visible). The dim starting states
+   exist only under .js, so without JavaScript the timeline is simply fully lit. */
+.timeline-node {
+  transition:
+    background-color 450ms ease,
+    color 450ms ease,
+    border-color 450ms ease;
+  transition-delay: calc(var(--i, 0) * 260ms + 350ms);
+}
+
+.js .timeline-wrap:not(.is-visible) .timeline-node {
+  background-color: var(--surface);
+  color: var(--fg-muted);
+  border-color: var(--line);
+}
+
+.js .timeline-line {
+  transform: scaleY(0);
+  transform-origin: top left;
+  transition: transform 1500ms var(--ease-reveal) 200ms;
+}
+
+.js .timeline-wrap.is-visible .timeline-line {
+  transform: none;
+}
+
+@media (min-width: 64rem) {
+  .js .timeline-line {
+    transform: scaleX(0);
+  }
 }
 
 /* Smooth in-page scrolling is opt-in: people who ask for less motion get instant jumps. */

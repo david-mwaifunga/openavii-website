@@ -35,6 +35,8 @@ interface SectionProps {
   numeralAlign?: 'left' | 'right';
   topCurve?: CurveSpec;
   bottomCurve?: CurveSpec;
+  /** Standard vertical padding. Set false when the section supplies its own (the hero). */
+  padded?: boolean;
   className?: string;
   children?: ReactNode;
 }
@@ -55,6 +57,7 @@ export function Section({
   numeralAlign,
   topCurve,
   bottomCurve,
+  padded = true,
   className,
   children,
 }: SectionProps) {
@@ -64,7 +67,7 @@ export function Section({
       id={id}
       aria-labelledby={labelledBy}
       data-surface={fixed ? surface : undefined}
-      className={cn('section-clip py-section', SURFACE_CLASS[surface], className)}
+      className={cn('section-clip', padded && 'py-section', SURFACE_CLASS[surface], className)}
     >
       {topCurve && <CurveDivider edge="top" {...topCurve} />}
       {numeral && <GhostNumeral value={numeral} align={numeralAlign} />}

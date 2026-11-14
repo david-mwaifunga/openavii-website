@@ -71,4 +71,9 @@ describe('Section', () => {
     const { container } = render(<Section id="x" surface="page" />);
     expect(container.firstElementChild?.className).toContain('py-section');
   });
+
+  it('can opt out of the standard padding (the hero supplies its own)', () => {
+    const { container } = render(<Section id="x" surface="dark" padded={false} />);
+    expect(container.firstElementChild?.className).not.toContain('py-section');
+  });
 });

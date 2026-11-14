@@ -54,6 +54,8 @@ interface ShapedPhotoProps {
   decorative?: boolean;
   /** CSS object-position, to keep the subject in frame. */
   objectPosition?: string;
+  /** Fill the parent's height (a grid cell) instead of keeping the shape's proportions. */
+  fill?: boolean;
   className?: string;
 }
 
@@ -65,17 +67,22 @@ export function ShapedPhoto({
   scrim = 'none',
   decorative = false,
   objectPosition,
+  fill = false,
   className,
 }: ShapedPhotoProps) {
   const image = photos[photo];
   const isChamfer = shape === 'chamfer';
   return (
     <div
-      className={cn('relative overflow-hidden', className)}
+      className={cn('relative overflow-hidden', fill && 'h-full min-h-56', className)}
       style={{
         clipPath: isChamfer ? CHAMFER : `url(#${shape})`,
         // Shapes keep their native proportions, so their curves look as designed.
-        aspectRatio: isChamfer ? `${image.width} / ${image.height}` : `${SHAPES[shape].aspect} / 1`,
+        aspectRatio: fill
+          ? undefined
+          : isChamfer
+            ? `${image.width} / ${image.height}`
+            : `${SHAPES[shape].aspect} / 1`,
       }}
     >
       <Image

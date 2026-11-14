@@ -289,6 +289,56 @@ describe('motion and accessibility rules', () => {
   });
 });
 
+describe('section behaviours that live in CSS', () => {
+  const rule = (selector: string) => blocks.filter((b) => b.selectors.some((s) => s === selector));
+
+  it("keeps the focus ring visible on every tile colour by following the tile's own text colour", () => {
+    const tile = parseDeclarations(rule('.tile')[0]?.body ?? '');
+    // Focus within a tile also applies its hover colours, so the ring uses the hover pair.
+    expect(tile['--focus']).toBe('var(--tile-fg-hover)');
+  });
+
+  it('draws the icon ring with a notch (the Mark\'s open ring) that "opens" on hover', () => {
+    const base = parseDeclarations(rule('.ring-path')[0]?.body ?? '');
+    expect(base['stroke-dasharray']).toBe('100');
+    expect(base['stroke-dashoffset']).toBe('8');
+    const frames = blocks.find((b) => b.selectors[0] === '@keyframes ring-open');
+    expect(frames?.body).toMatch(/from\s*\{[^}]*stroke-dashoffset:\s*100/);
+    expect(frames?.body).toMatch(/to\s*\{[^}]*stroke-dashoffset:\s*8/);
+  });
+
+  it('highlights every service a problem card relates to, in pure CSS, for every card target', async () => {
+    const { problems } = await import('@/content/problems');
+    const targets = [...new Set(problems.flatMap((p) => p.targets))];
+    expect(targets.length).toBeGreaterThanOrEqual(8);
+    for (const slug of targets) {
+      expect(css, `related highlight for ${slug}`).toContain(`data-targets~="${slug}"`);
+      expect(css).toContain(`#service-${slug}`);
+    }
+  });
+
+  it('lets headings inside a tile inherit the tile text colour (a white heading would fail on a cyan tile)', () => {
+    const headings = blocks.find((b) => b.selectors.some((s) => /^\.tile :where\(h1/.test(s)));
+    expect(headings, 'missing ".tile :where(h1, ...)" rule').toBeDefined();
+    expect(parseDeclarations(headings?.body ?? '').color).toBe('inherit');
+  });
+
+  it('lights a service tile reached by an in-page link (:target) with an outline', () => {
+    const target = parseDeclarations(rule('.tile:target')[0]?.body ?? '');
+    expect(target.outline).toMatch(/2px solid/);
+  });
+
+  it('shows the process timeline fully lit without JavaScript (dim states exist only under .js)', () => {
+    const dim = blocks.filter((b) => /timeline-node/.test(b.selectors.join(',')) && /:not\(\.is-visible\)/.test(b.selectors.join(',')));
+    expect(dim.length).toBeGreaterThan(0);
+    for (const block of dim) {
+      for (const selector of block.selectors) expect(selector).toMatch(/^\.js\s/);
+    }
+    const line = blocks.filter((b) => b.selectors.some((s) => /^\.js .*\.timeline-line/.test(s)));
+    expect(line.length).toBeGreaterThan(0);
+  });
+});
+
 describe('logo variants switch in CSS only (no mounted skeleton, no layout shift)', () => {
   const rule = (variant: string) =>
     blocks.filter((b) => b.selectors.some((s) => s.includes(variant)));

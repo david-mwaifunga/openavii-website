@@ -83,10 +83,16 @@ describe('Logo', () => {
     expect(parseFloat(wrapper.style.padding)).toBeCloseTo(height / 3, 1);
   });
 
-  it('can be a decorative mark with no accessible name', () => {
+  it('can be a decorative mark with no accessible name, hidden from assistive technology', () => {
     const { container } = render(<Logo variant="mark" decorative />);
     for (const img of container.querySelectorAll('img')) {
       expect(img).toHaveAttribute('alt', '');
+      expect(img.closest('[aria-hidden="true"]')).not.toBeNull();
     }
+  });
+
+  it('is exposed to assistive technology when it is not decorative', () => {
+    const { container } = render(<Logo variant="full" />);
+    expect(container.querySelector('[aria-hidden="true"]')).toBeNull();
   });
 });

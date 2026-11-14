@@ -69,6 +69,7 @@ export function Logo({
   return (
     <span
       className="inline-block align-middle"
+      aria-hidden={decorative ? true : undefined}
       style={padding === undefined ? undefined : { padding: `${padding}px` }}
     >
       {tone === 'auto' && (

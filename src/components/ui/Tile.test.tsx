@@ -70,11 +70,27 @@ describe('brand devices', () => {
     expect(el.className).toContain('pointer-events-none');
   });
 
-  it('RingMark is the approved mark as a decorative watermark (empty alt)', () => {
+  it('RingMark is the approved mark, used as a mask over a flat palette colour (decorative, never an <img>)', () => {
     const { container } = render(<RingMark tone="white" className="opacity-10" />);
-    const img = container.querySelector('img') as HTMLImageElement;
-    expect(img).toHaveAttribute('alt', '');
-    expect(decodeURIComponent(img.getAttribute('src') ?? '')).toContain('openavii-mark-white.png');
-    expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    const ring = container.firstElementChild as HTMLElement;
+    expect(ring).toHaveAttribute('aria-hidden', 'true');
+    // A mask, not an image element: a huge faint <img> would be reported as the page's LCP element.
+    expect(container.querySelector('img')).toBeNull();
+    expect(ring.style.maskImage || ring.style.getPropertyValue('mask-image') || ring.getAttribute('style')).toContain(
+      'openavii-mark-white.png',
+    );
+    expect(ring.className).toContain('bg-brand-white');
+  });
+
+  it('RingMark can be tinted only with palette colours', () => {
+    for (const [tone, cls] of [
+      ['white', 'bg-brand-white'],
+      ['cyan', 'bg-cyan'],
+      ['navy', 'bg-navy'],
+    ] as const) {
+      const { container, unmount } = render(<RingMark tone={tone} />);
+      expect((container.firstElementChild as HTMLElement).className).toContain(cls);
+      unmount();
+    }
   });
 });

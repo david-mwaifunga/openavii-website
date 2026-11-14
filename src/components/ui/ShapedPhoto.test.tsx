@@ -50,6 +50,13 @@ describe('ShapedPhoto', () => {
     expect(frame.style.aspectRatio.replace(/\s/g, '')).toBe(`${SHAPES['shape-3'].aspect}/1`);
   });
 
+  it('can fill a grid cell instead of keeping the shape proportions', () => {
+    const { container } = render(<ShapedPhoto photo="field-tablet" shape="chamfer" sizes="33vw" fill />);
+    const frame = container.firstElementChild as HTMLElement;
+    expect(frame.style.aspectRatio).toBeFalsy();
+    expect(frame.className).toContain('h-full');
+  });
+
   it('offers the chamfered frame (one cut corner) without any SVG dependency', () => {
     const { container } = render(<ShapedPhoto photo="field-tablet" shape="chamfer" sizes="40vw" />);
     const frame = container.firstElementChild as HTMLElement;
