@@ -59,7 +59,7 @@ export const site = {
   registrations: [
     { authority: 'PACRA', label: 'Company Registration No.', number: '120261049958' },
   ],
-  registrationLine: 'Registered in Zambia · PACRA No. 120261049958',
+  registrationLine: 'Registered in Zambia' /*· PACRA No. 120261049958'*/,
 
   /** Empty until real profile URLs are supplied: no dead social buttons. */
   socialLinks: [] as readonly SocialLink[],
